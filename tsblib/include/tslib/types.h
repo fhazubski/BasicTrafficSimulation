@@ -1,0 +1,90 @@
+#pragma once
+
+#include <algorithm>
+
+namespace TSP {
+
+using tsp_float = long double;
+using tsp_byte = unsigned char;
+using tsp_int = long long;
+using tsp_id = unsigned long;
+
+struct tsp_position {
+  tsp_float x;
+  tsp_float y;
+};
+
+struct tsp_line {
+  tsp_position start;
+  tsp_position end;
+};
+
+enum class tsp_obstacle_type {
+  solid,
+  road_line,
+};
+
+struct tsp_obstacle_line {
+  tsp_obstacle_type type;
+  tsp_line line;
+};
+
+struct tsp_road_lane {
+  tsp_road_lane(const tsp_int pointsCount, const tsp_int maxVelocity)
+      : pointsCount(pointsCount), maxVelocity(maxVelocity) {
+    points = new tsp_int[pointsCount];
+    std::fill_n(points, pointsCount, 0);
+  }
+  const tsp_int pointsCount;
+  tsp_int *points;
+  const tsp_int maxVelocity = 5;
+  //const tsp_position *points;
+};
+
+struct tsp_road {
+  const tsp_int lanesCount;
+  const tsp_road_lane *const *lanes;
+};
+
+struct tsp_rotation {
+  tsp_float rotation;
+};
+
+struct tsp_vehicle_position {
+  tsp_id lane;
+  tsp_int position;
+};
+
+struct tsp_vehicle_base {
+  tsp_vehicle_base() : followedRoad(nullptr) {}
+  tsp_vehicle_base(const tsp_road *followedRoad) : followedRoad(followedRoad) {}
+  tsp_float width;
+  tsp_float height;
+  tsp_float axleDistance;
+  tsp_float frontWheelsDistance;
+  tsp_float velocity;
+  tsp_float axleAngle;
+  const tsp_road *followedRoad;
+  tsp_int followedLane;
+};
+
+struct tsp_engine {
+  tsp_float desiredVelocity;
+  tsp_float force;
+};
+
+struct tsp_steeringAxle {
+  tsp_float desiredAxleAngle;
+};
+
+struct tsp_vehicle : tsp_vehicle_position {
+  tsp_int velocity;
+  tsp_id id;
+};
+
+struct tsp_simulation_result {
+  tsp_float vehiclesPerTime;
+  tsp_float vehiclesDensity;
+};
+
+} // namespace TSP
