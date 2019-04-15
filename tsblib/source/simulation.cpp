@@ -42,7 +42,7 @@ bool Simulation::addVehicle(tsp_id startLane, tsp_int velocity) {
   vehicles.push_back(vehicle);
   roadLanes[startLane].points[0] = vehicles.back().id;
 
-  std::cout << "TSP: new vehicles size: " << vehicles.size() << std::endl;
+  // std::cout << "TSP: new vehicles size: " << vehicles.size() << std::endl;
 
   vehicleId++;
   return true;
@@ -60,7 +60,10 @@ bool Simulation::setTime(tsp_float newTime) {
 
   tsp_int newTimeInt = static_cast<tsp_int>(floor(newTime / 1000.0));
   tsp_int timeDifference = newTimeInt - time;
-  for (int timeTick = 0; timeTick < timeDifference; timeTick++) {
+  //std::cout << "TSP time" << time
+  //          << " "  << newTime << " " << timeDifference << std::endl;
+  for (int timeTick = 0; timeTick < timeDifference;
+                        timeTick++) {
     auto vehicle = std::begin(vehicles);
     while (vehicle != std::end(vehicles)) {
       tsp_int distance =
@@ -77,37 +80,40 @@ bool Simulation::setTime(tsp_float newTime) {
           vehicle->velocity--;
       }
 
-      roadLanes[vehicle->lane].points[vehicle->position] = 0;
-      vehicle->position += vehicle->velocity;
-      if (vehicle->position >= roadLanes[vehicle->lane].pointsCount) {
-        vehicle = vehicles.erase(vehicle);
-        if (!firstVehicleLeft) {
-          statisticsStartTime = time + timeTick;
-          gatheringStatisticsTime = 100000 * roadLanes[0].maxVelocity;
-          gatheringStatisticsTimeLeft = gatheringStatisticsTime;
-          density = 0;
-          vehiclesCountStartTime = vehicles.size();
-          firstVehicleLeft = true;
+      if (vehicle->velocity > 0) {
+        roadLanes[vehicle->lane].points[vehicle->position] = 0;
+        vehicle->position += vehicle->velocity;
+        if (vehicle->position >= roadLanes[vehicle->lane].pointsCount) {
+          vehicle = vehicles.erase(vehicle);
+          if (!firstVehicleLeft) {
+            statisticsStartTime = time + timeTick;
+            gatheringStatisticsTime = 2000 * roadLanes[0].maxVelocity;
+            density = 0;
+            vehiclesCountStartTime = vehicles.size();
+            firstVehicleLeft = true;
+          }
+          vehiclesLeftCount++;
+          continue;
         }
-        vehiclesLeftCount++;
-        continue;
+        roadLanes[vehicle->lane].points[vehicle->position] = vehicle->id;
       }
-
-      gatheringStatisticsTimeLeft--;
-      density += static_cast<tsp_float>(vehicles.size()) /
-                 static_cast<tsp_float>(gatheringStatisticsTime);
-      if (gatheringStatisticsTimeLeft == 0) {
-        vehiclesPassed = vehiclesLeftCount;
-        vehiclesPerTime = static_cast<tsp_float>(vehiclesPassed) /
-                          static_cast<tsp_float>(gatheringStatisticsTime);
-        std::cout << "TSP results: " << vehiclesPassed << " "
-                  << gatheringStatisticsTime << " " << vehiclesPerTime
-                  << std::endl;
-        density /= static_cast<tsp_float>(roadLanes[0].pointsCount);
-      }
-
-      roadLanes[vehicle->lane].points[vehicle->position] = vehicle->id;
       vehicle++;
+    }
+    density += static_cast<tsp_float>(vehicles.size()) /
+               static_cast<tsp_float>(gatheringStatisticsTime);
+    //std::cout << "TSP: vehicles " << vehicles.size() << std::endl;
+    // std::cout << "TSP: time " << statisticsStartTime +
+    // gatheringStatisticsTime
+    //          << " " << time + timeTick << std::endl;
+    if (statisticsStartTime + gatheringStatisticsTime == time + timeTick) {
+      vehiclesPerTime = static_cast<tsp_float>(vehiclesLeftCount) /
+                        static_cast<tsp_float>(gatheringStatisticsTime);
+      // std::cout << "TSP results: " << vehiclesPassed << " "
+      //          << gatheringStatisticsTime << " " << vehiclesPerTime
+      //          << std::endl;
+      vehiclesDensity =
+          density / static_cast<tsp_float>(roadLanes[0].pointsCount);
+      simulationEnded = true;
     }
   }
   time = newTimeInt;
@@ -116,14 +122,14 @@ bool Simulation::setTime(tsp_float newTime) {
 
 tsp_simulation_result Simulation::simulate(tsp_int vehicleSpawningInterval) {
   tsp_int currentTime = 0;
-  while (!firstVehicleLeft || gatheringStatisticsTimeLeft > 0) {
+  while (!simulationEnded) {
     addVehicle(0, roadLanes[0].maxVelocity);
     currentTime += vehicleSpawningInterval;
     setTime(currentTime);
   }
   tsp_simulation_result results;
   results.vehiclesPerTime = vehiclesPerTime;
-  results.vehiclesDensity = density;
+  results.vehiclesDensity = vehiclesDensity;
   return results;
 }
 
@@ -173,7 +179,7 @@ void Simulation::overrideAxleAngle(TSP::tsp_id vehicle, TSP::tsp_float angle) {
 }
 */
 
-tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle vehicle,
+tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle &vehicle,
                                              const tsp_int maxDistance) {
   tsp_int newMaxDistance = maxDistance;
   if (roadLanes[vehicle.lane].pointsCount - vehicle.position < maxDistance) {

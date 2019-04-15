@@ -14,7 +14,7 @@ public:
   tsp_simulation_result simulate(tsp_int vehicleSpawningInterval);
 
 private:
-  tsp_int distanceToTheNextVehicle(tsp_vehicle vehicle,
+  tsp_int distanceToTheNextVehicle(tsp_vehicle &vehicle,
 	  const tsp_int maxDistance);
 
   tsp_obstacle_line *obstacles = nullptr;
@@ -31,9 +31,10 @@ private:
   tsp_int vehiclesLeftCount = 0;
   tsp_int gatheringStatisticsTime;
   tsp_int gatheringStatisticsTimeLeft = 0;
-  tsp_int vehiclesPassed;
   tsp_float vehiclesPerTime;
   tsp_float density;
+  tsp_float vehiclesDensity;
+  bool simulationEnded = false;
 
   std::vector<tsp_road_lane> roadLanes;
   std::vector<tsp_vehicle> vehicles;
