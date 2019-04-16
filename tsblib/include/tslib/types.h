@@ -79,6 +79,7 @@ struct tsp_steeringAxle {
 
 struct tsp_vehicle : tsp_vehicle_position {
   tsp_int velocity;
+  tsp_int newVelocity;
   tsp_id id;
 };
 

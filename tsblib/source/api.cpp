@@ -4,17 +4,18 @@
 #include "tslib/types.h"
 #include <iostream>
 
-TSP::tsp_simulation_result tspSimulate(TSP::tsp_int maxVelocity,
-                 TSP::tsp_float velocityDecreaseProbability,
-                 TSP::tsp_int laneLength, TSP::tsp_int carSpawningInterval) {
+TSP::tsp_simulation_result
+tspSimulate(TSP::tsp_int maxVelocity, TSP::tsp_int newVehicleVelocity,
+            TSP::tsp_float velocityDecreaseProbability, TSP::tsp_int laneLength,
+            TSP::tsp_float carDensity) {
   Simulation simulation;
   simulation.addLane(laneLength, maxVelocity);
   simulation.setP(velocityDecreaseProbability);
-  return simulation.simulate(carSpawningInterval);
+  return simulation.simulate(newVehicleVelocity, carDensity);
 }
 
 bool tspAddVehicle(TSP::tsp_id lane, TSP::tsp_int velocity) {
-  return simulation.addVehicle(lane, velocity);
+  return simulation.addVehicle(lane, 0, velocity);
 }
 
 TSP::tsp_id tspAddLane(TSP::tsp_int length) {

@@ -22,6 +22,10 @@ void SimulationView::paint(QPainter *painter) {
                    m_simulation->m_vehiclesPositions[0].position) *
                    vehicleWidth
             << " " << vehicleWidth << std::endl;
+  for (TSP::tsp_float i = 0; i < 120; i++) {
+    painter->drawLine(i * vehicleWidth, 100.0, i * vehicleWidth,
+                      100.0 + vehicleWidth);
+  }
   for (int i = 0; i < m_simulation->m_vehicles.size(); i++) {
     painter->fillRect(
         QRectF(

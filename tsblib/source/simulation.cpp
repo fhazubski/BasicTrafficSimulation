@@ -26,21 +26,24 @@ tsp_obstacle_line *Simulation::reserveObstacleMemory(tsp_int count) {
   return obstacles;
 }
 */
-bool Simulation::addVehicle(tsp_id startLane, tsp_int velocity) {
+bool Simulation::addVehicle(tsp_id startLane, tsp_int startPosition,
+                            tsp_int velocity) {
   static tsp_id vehicleId = 1;
   // std::cout << "TSP: lane " << startLane << " " << roadLanes.size()
   //          << std::endl;
-  if (startLane >= roadLanes.size() || roadLanes[startLane].points[0] != 0) {
+  if (startLane >= roadLanes.size() ||
+      startPosition >= roadLanes[startLane].pointsCount ||
+      roadLanes[startLane].points[startPosition] != 0) {
     return false;
   }
 
   tsp_vehicle vehicle;
   vehicle.velocity = velocity;
   vehicle.lane = startLane;
-  vehicle.position = 0;
+  vehicle.position = startPosition;
   vehicle.id = vehicleId;
   vehicles.push_back(vehicle);
-  roadLanes[startLane].points[0] = vehicles.back().id;
+  roadLanes[startLane].points[startPosition] = vehicles.back().id;
 
   // std::cout << "TSP: new vehicles size: " << vehicles.size() << std::endl;
 
@@ -60,81 +63,88 @@ bool Simulation::setTime(tsp_float newTime) {
 
   tsp_int newTimeInt = static_cast<tsp_int>(floor(newTime / 1000.0));
   tsp_int timeDifference = newTimeInt - time;
-  //std::cout << "TSP time" << time
+  // std::cout << "TSP time" << time
   //          << " "  << newTime << " " << timeDifference << std::endl;
-  for (int timeTick = 0; timeTick < timeDifference;
-                        timeTick++) {
-    auto vehicle = std::begin(vehicles);
-    while (vehicle != std::end(vehicles)) {
-      tsp_int distance =
-          distanceToTheNextVehicle(*vehicle, vehicle->velocity + 2);
-      if (distance <= vehicle->velocity) {
-        vehicle->velocity = distance - 1;
-      } else if (vehicle->velocity < roadLanes[vehicle->lane].maxVelocity &&
-                 distance == vehicle->velocity + 2) {
-        vehicle->velocity++;
+  for (int timeTick = 0; timeTick < timeDifference; timeTick++) {
+    for (auto &vehicle : vehicles) {
+      tsp_int distance = distanceToTheNextVehicle(vehicle);
+      if (distance <= vehicle.velocity) {
+        vehicle.newVelocity = distance - 1;
+      } else if (vehicle.velocity < roadLanes[vehicle.lane].maxVelocity &&
+                 distance == vehicle.velocity + 2) {
+        vehicle.newVelocity = vehicle.velocity + 1;
+      } else {
+        vehicle.newVelocity = vehicle.velocity;
       }
 
-      if (HelperMath::getRandom() <= velocityDecreaseProbability) {
-        if (vehicle->velocity > 0)
-          vehicle->velocity--;
+      auto randomValue = HelperMath::getRandom();
+      // std::cout << "TSP: rand " << randomValue << " "
+      //          << velocityDecreaseProbability << " " << vehicle->velocity
+      //          << std::endl;
+      if (randomValue <= velocityDecreaseProbability) {
+        if (vehicle.newVelocity > 0)
+          vehicle.newVelocity--;
       }
-
-      if (vehicle->velocity > 0) {
-        roadLanes[vehicle->lane].points[vehicle->position] = 0;
-        vehicle->position += vehicle->velocity;
-        if (vehicle->position >= roadLanes[vehicle->lane].pointsCount) {
-          vehicle = vehicles.erase(vehicle);
-          if (!firstVehicleLeft) {
-            statisticsStartTime = time + timeTick;
-            gatheringStatisticsTime = 2000 * roadLanes[0].maxVelocity;
-            density = 0;
-            vehiclesCountStartTime = vehicles.size();
-            firstVehicleLeft = true;
-          }
-          vehiclesLeftCount++;
-          continue;
-        }
-        roadLanes[vehicle->lane].points[vehicle->position] = vehicle->id;
-      }
-      vehicle++;
     }
-    density += static_cast<tsp_float>(vehicles.size()) /
-               static_cast<tsp_float>(gatheringStatisticsTime);
-    //std::cout << "TSP: vehicles " << vehicles.size() << std::endl;
+
+    for (auto &vehicle : vehicles) {
+      vehicle.velocity = vehicle.newVelocity;
+      if (vehicle.velocity > 0) {
+        roadLanes[vehicle.lane].points[vehicle.position] = 0;
+        vehicle.position += vehicle.velocity;
+        vehiclesCoveredDistance += vehicle.velocity;
+        if (vehicle.position >= roadLanes[0].pointsCount) {
+          vehicle.position -= roadLanes[0].pointsCount;
+        }
+        roadLanes[vehicle.lane].points[vehicle.position] = vehicle.id;
+      }
+    }
+    // std::cout << "TSP velocities: ";
+    // for (auto v : vCounts) {
+    //  std::cout << v << " ";
+    //}
+    // std::cout << std::endl;
+    // std::cout << "TSP: vehicles " << vehicles.size() << std::endl;
     // std::cout << "TSP: time " << statisticsStartTime +
     // gatheringStatisticsTime
     //          << " " << time + timeTick << std::endl;
-    if (statisticsStartTime + gatheringStatisticsTime == time + timeTick) {
-      vehiclesPerTime = static_cast<tsp_float>(vehiclesLeftCount) /
-                        static_cast<tsp_float>(gatheringStatisticsTime);
-      // std::cout << "TSP results: " << vehiclesPassed << " "
-      //          << gatheringStatisticsTime << " " << vehiclesPerTime
-      //          << std::endl;
-      vehiclesDensity =
-          density / static_cast<tsp_float>(roadLanes[0].pointsCount);
-      simulationEnded = true;
-    }
   }
   time = newTimeInt;
   return true;
 }
 
-tsp_simulation_result Simulation::simulate(tsp_int vehicleSpawningInterval) {
-  tsp_int currentTime = 0;
-  while (!simulationEnded) {
-    addVehicle(0, roadLanes[0].maxVelocity);
-    currentTime += vehicleSpawningInterval;
-    setTime(currentTime);
+tsp_simulation_result Simulation::simulate(tsp_int newVehicleVelocity,
+                                           tsp_float carDensity) {
+  tsp_int carsToSpawnCount =
+      static_cast<tsp_float>(roadLanes[0].pointsCount) * carDensity;
+  std::cout << "TSP to spawn " << carsToSpawnCount << std::endl;
+  tsp_int carsLeftToSpawn = carsToSpawnCount;
+  while (carsLeftToSpawn > 0) {
+    tsp_int newPosition =
+        std::ceil(static_cast<tsp_float>(roadLanes[0].pointsCount) *
+                  HelperMath::getRandom()) -
+        1;
+    if (addVehicle(0, newPosition, newVehicleVelocity)) {
+      carsLeftToSpawn--;
+    }
   }
+  tsp_float simulationTime = 10000 * 1000 * roadLanes[0].maxVelocity;
+  setTime(simulationTime);
   tsp_simulation_result results;
-  results.vehiclesPerTime = vehiclesPerTime;
-  results.vehiclesDensity = vehiclesDensity;
+  if (carsToSpawnCount == 0) {
+    results.vehiclesPerTime = 0;
+  } else {
+    results.vehiclesPerTime = static_cast<tsp_float>(vehiclesCoveredDistance) /
+                              (simulationTime / 1000.0);
+  }
+  results.vehiclesDensity = carDensity;
+  std::cout << "TSP: results: " << results.vehiclesPerTime << " "
+            << results.vehiclesDensity << std::endl;
   return results;
 }
 
 bool Simulation::tspGetPositions(TSP::tsp_vehicle_position *vehiclePositions) {
-  // std::cout << "TSP: " << vehicles.size() << std::endl;
+  std::cout << "TSP: vehicles size " << vehicles.size() << std::endl;
   for (int i = 0; i < vehicles.size(); i++) {
     vehiclePositions[i].lane = vehicles[i].lane;
     vehiclePositions[i].position = vehicles[i].position;
@@ -179,18 +189,14 @@ void Simulation::overrideAxleAngle(TSP::tsp_id vehicle, TSP::tsp_float angle) {
 }
 */
 
-tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle &vehicle,
-                                             const tsp_int maxDistance) {
-  tsp_int newMaxDistance = maxDistance;
-  if (roadLanes[vehicle.lane].pointsCount - vehicle.position < maxDistance) {
-    newMaxDistance = roadLanes[vehicle.lane].pointsCount - vehicle.position;
-  }
-
-  for (tsp_int d = 1; d < newMaxDistance; d++) {
-    if (roadLanes[vehicle.lane].points[vehicle.position + d] != 0)
+tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle &vehicle) {
+  for (tsp_int d = 1; d < vehicle.velocity + 2; d++) {
+    if (roadLanes[vehicle.lane].points[(vehicle.position + d) %
+                                       roadLanes[vehicle.lane].pointsCount] !=
+        0)
       return d;
   }
-  return maxDistance;
+  return vehicle.velocity + 2;
 }
 
 } // namespace TSP

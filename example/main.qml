@@ -23,6 +23,7 @@ Window {
     Item {
         anchors.fill: parent
         Component.onCompleted: {
+            console.log(simulation)
             simulationView.setSimulation(simulation)
             simulation.overrideAxleAngle(1, 15)
         }
@@ -35,6 +36,7 @@ Window {
             onTriggered: {
                 time += interval
                 console.log(simulation)
+                simulation.addVehicle(0,0,1,0,0)
                 simulation.setTime(time)
                 simulationView.refresh()
             }
@@ -59,16 +61,16 @@ Window {
         anchors.fill: parent
     }
 
-    Repeater {
-        model: simulation.vehicles
-        Rectangle {
-            id: rect
-            x: (simulation.vehicles[index].x + globals.xOffset) * globals.pixelsPerMeter - width / 2
-            y: (simulation.vehicles[index].y + globals.yOffset) * globals.pixelsPerMeter - height / 2
-            width: simulation.vehicles[index].width * globals.pixelsPerMeter
-            height: simulation.vehicles[index].height * globals.pixelsPerMeter
-            rotation: 90 + simulation.vehicles[index].rotation
-            color: Qt.rgba(Math.random(),Math.random(),Math.random(),1);
-        }
-    }
+//    Repeater {
+//        model: simulation.vehicles
+//        Rectangle {
+//            id: rect
+//            x: (simulation.vehicles[index].x + globals.xOffset) * globals.pixelsPerMeter - width / 2
+//            y: (simulation.vehicles[index].y + globals.yOffset) * globals.pixelsPerMeter - height / 2
+//            width: simulation.vehicles[index].width * globals.pixelsPerMeter
+//            height: simulation.vehicles[index].height * globals.pixelsPerMeter
+//            rotation: 90 + simulation.vehicles[index].rotation
+//            color: Qt.rgba(Math.random(),Math.random(),Math.random(),1);
+//        }
+//    }
 }

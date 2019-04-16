@@ -28,7 +28,7 @@ void Simulation::setTime(qreal time) {
 
 void Simulation::addVehicle(qreal width, qreal height, qreal velocity,
                             qint32 road, qint32 lane) {
-  std::cout << tspAddVehicle(laneId, 5) << std::endl;
+  std::cout << tspAddVehicle(laneId, velocity) << std::endl;
   m_vehicles.append(new Vehicle);
   delete[] m_vehiclesPositions;
   m_vehiclesPositions = new TSP::tsp_vehicle_position[m_vehicles.count()];

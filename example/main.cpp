@@ -12,6 +12,8 @@
 #include <fstream>
 #include <iostream>
 
+#define SIMULATE_AND_SAVE_TO_FILE 1
+
 struct simulationResultCompare {
   inline bool operator()(const TSP::tsp_simulation_result &result1,
                          const TSP::tsp_simulation_result &result2) {
@@ -24,28 +26,31 @@ int main(int argc, char *argv[]) {
   QGuiApplication app(argc, argv);
   QQmlApplicationEngine engine;
 
-  std::ofstream outCsv;
-  outCsv.open("symulacja.csv");
-  std::vector<TSP::tsp_simulation_result> results;
-  for (int i = 1; i <= 200; i += 1) {
-    std::cout << "progress: " << i << std::endl;
-    for (int n = 0; n < 5; n++) {
-      results.push_back(tspSimulate(5, 0.1, 1000, i * 1000));
+  if (SIMULATE_AND_SAVE_TO_FILE) {
+    std::ofstream outCsv;
+    outCsv.open("symulacja.csv");
+    std::vector<TSP::tsp_simulation_result> results;
+    for (TSP::tsp_float d = 0.5; d >= 0.005; d *= 0.95) {
+      std::cout << "progress: " << d << std::endl;
+      for (int startV = 5; startV <= 5; startV++) {
+        for (int n = 0; n < 5; n++) {
+          results.push_back(tspSimulate(5, startV, 0.01, 1000, d));
+        }
+      }
     }
+
+    std::sort(results.begin(), results.end(), simulationResultCompare());
+
+    for (int i = 0; i < results.size(); i++) {
+      std::string toSave = std::to_string(i) + ";" +
+                           std::to_string(results[i].vehiclesDensity) + ";" +
+                           std::to_string(results[i].vehiclesPerTime);
+      std::replace(toSave.begin(), toSave.end(), '.', ',');
+      outCsv << toSave << std::endl;
+    }
+    outCsv.close();
+    return 0;
   }
-
-  std::sort(results.begin(), results.end(), simulationResultCompare());
-
-  for (int i = 0; i < results.size(); i++) {
-    std::string toSave = std::to_string(i) + ";" +
-                         std::to_string(results[i].vehiclesDensity) + ";" +
-                         std::to_string(results[i].vehiclesPerTime);
-    std::replace(toSave.begin(), toSave.end(), '.', ',');
-    outCsv << toSave << std::endl;
-  }
-  outCsv.close();
-  return 0;
-
   Simulation simulation;
 
   engine.rootContext()->setContextProperty("simulation", &simulation);

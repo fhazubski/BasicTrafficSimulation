@@ -64,7 +64,8 @@ tsp_float HelperMath::getRandom() {
     srand(static_cast<unsigned>(time(nullptr)));
     initialize = false;
   }
-  return (static_cast<tsp_float>(rand() + 1) / static_cast<tsp_float>(RAND_MAX + 1));
+  return (static_cast<tsp_float>(rand() + 1) /
+          static_cast<tsp_float>(RAND_MAX + 1));
 }
 
 } // namespace TSP
