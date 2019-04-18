@@ -3,9 +3,12 @@
 #include "tslib_export.h"
 
 TSP::tsp_simulation_result TSLIB_EXPORT
-tspSimulate(TSP::tsp_int maxVelocity, TSP::tsp_int newVehicleVelocity,
-            TSP::tsp_float velocityDecreaseProbability, TSP::tsp_int laneLength,
-            TSP::tsp_float carDensity);
+tspSimulate(TSP::tsp_float maxVelocityMps, TSP::tsp_float newVehicleVelocityMps,
+            TSP::tsp_float velocityChangeMps,
+            TSP::tsp_float velocityDecreaseProbability,
+            TSP::tsp_float vehicleOccupiedSpaceM, TSP::tsp_float spaceLengthM,
+            TSP::tsp_float laneLengthM, TSP::tsp_float carDensity,
+            TSP::tsp_float simulationDurationS);
 
 bool TSLIB_EXPORT tspAddVehicle(TSP::tsp_id lane, TSP::tsp_int velocity);
 

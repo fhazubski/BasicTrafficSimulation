@@ -5,13 +5,19 @@
 #include <iostream>
 
 TSP::tsp_simulation_result
-tspSimulate(TSP::tsp_int maxVelocity, TSP::tsp_int newVehicleVelocity,
-            TSP::tsp_float velocityDecreaseProbability, TSP::tsp_int laneLength,
-            TSP::tsp_float carDensity) {
+tspSimulate(TSP::tsp_float maxVelocityMps, TSP::tsp_float newVehicleVelocityMps,
+            TSP::tsp_float velocityChangeMps,
+            TSP::tsp_float velocityDecreaseProbability,
+            TSP::tsp_float vehicleOccupiedSpaceM, TSP::tsp_float spaceLengthM,
+            TSP::tsp_float laneLengthM, TSP::tsp_float carDensity,
+            TSP::tsp_float simulationDurationS) {
   Simulation simulation;
-  simulation.addLane(laneLength, maxVelocity);
+  simulation.addLane(spaceLengthM, laneLengthM,
+                     std::round(maxVelocityMps / spaceLengthM));
   simulation.setP(velocityDecreaseProbability);
-  return simulation.simulate(newVehicleVelocity, carDensity);
+  return simulation.simulate(newVehicleVelocityMps, velocityChangeMps,
+                             vehicleOccupiedSpaceM, spaceLengthM, carDensity,
+                             simulationDurationS);
 }
 
 bool tspAddVehicle(TSP::tsp_id lane, TSP::tsp_int velocity) {
@@ -21,7 +27,7 @@ bool tspAddVehicle(TSP::tsp_id lane, TSP::tsp_int velocity) {
 TSP::tsp_id tspAddLane(TSP::tsp_int length) {
   if (length < 1)
     return -1;
-  return simulation.addLane(length, 5);
+  return simulation.addLane(7.5, length, 5);
 }
 
 bool tspSetTime(TSP::tsp_float time) { return simulation.setTime(time); }

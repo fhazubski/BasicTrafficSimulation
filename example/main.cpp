@@ -13,6 +13,7 @@
 #include <iostream>
 
 #define SIMULATE_AND_SAVE_TO_FILE 1
+#define SIMULATE_QUICK 1
 
 struct simulationResultCompare {
   inline bool operator()(const TSP::tsp_simulation_result &result1,
@@ -30,21 +31,20 @@ int main(int argc, char *argv[]) {
     std::ofstream outCsv;
     outCsv.open("symulacja.csv");
     std::vector<TSP::tsp_simulation_result> results;
-    for (TSP::tsp_float d = 0.5; d >= 0.005; d *= 0.95) {
+    for (TSP::tsp_float d = 0.8; d >= 0.01;
+         d *= (SIMULATE_QUICK ? 0.75 : 0.9)) {
       std::cout << "progress: " << d << std::endl;
-      for (int startV = 5; startV <= 5; startV++) {
-        for (int n = 0; n < 5; n++) {
-          results.push_back(tspSimulate(5, startV, 0.01, 1000, d));
-        }
+      for (int n = 0; n < (SIMULATE_QUICK ? 10 : 5); n++) {
+        results.push_back(tspSimulate(37.5, 37.5, 7.5, 0.5, 7.5, 1.5, 7500, d,
+                                      (SIMULATE_QUICK ? 500 : 5000)));
       }
     }
 
     std::sort(results.begin(), results.end(), simulationResultCompare());
 
-    for (int i = 0; i < results.size(); i++) {
-      std::string toSave = std::to_string(i) + ";" +
-                           std::to_string(results[i].vehiclesDensity) + ";" +
-                           std::to_string(results[i].vehiclesPerTime);
+    for (auto &result : results) {
+      std::string toSave = std::to_string(result.vehiclesDensity * 8.0) + ";" +
+                           std::to_string(result.vehiclesPerTime);
       std::replace(toSave.begin(), toSave.end(), '.', ',');
       outCsv << toSave << std::endl;
     }

@@ -30,15 +30,18 @@ struct tsp_obstacle_line {
 };
 
 struct tsp_road_lane {
-  tsp_road_lane(const tsp_int pointsCount, const tsp_int maxVelocity)
-      : pointsCount(pointsCount), maxVelocity(maxVelocity) {
+  tsp_road_lane(const tsp_int pointsCount, const tsp_float spaceLengthM,
+                const tsp_int maxVelocity)
+      : pointsCount(pointsCount), spaceLengthM(spaceLengthM),
+        maxVelocity(maxVelocity) {
     points = new tsp_int[pointsCount];
     std::fill_n(points, pointsCount, 0);
   }
   const tsp_int pointsCount;
   tsp_int *points;
-  const tsp_int maxVelocity = 5;
-  //const tsp_position *points;
+  const tsp_float spaceLengthM;
+  const tsp_int maxVelocity;
+  // const tsp_position *points;
 };
 
 struct tsp_road {
