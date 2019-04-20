@@ -6,7 +6,8 @@
 
 TSP::tsp_simulation_result
 tspSimulate(TSP::tsp_float maxVelocityMps, TSP::tsp_float newVehicleVelocityMps,
-            TSP::tsp_float velocityChangeMps,
+            TSP::tsp_float accelerationMps,
+            TSP::tsp_float randomDecelerationMps,
             TSP::tsp_float velocityDecreaseProbability,
             TSP::tsp_float vehicleOccupiedSpaceM, TSP::tsp_float spaceLengthM,
             TSP::tsp_float laneLengthM, TSP::tsp_float carDensity,
@@ -15,9 +16,9 @@ tspSimulate(TSP::tsp_float maxVelocityMps, TSP::tsp_float newVehicleVelocityMps,
   simulation.addLane(spaceLengthM, laneLengthM,
                      std::round(maxVelocityMps / spaceLengthM));
   simulation.setP(velocityDecreaseProbability);
-  return simulation.simulate(newVehicleVelocityMps, velocityChangeMps,
-                             vehicleOccupiedSpaceM, spaceLengthM, carDensity,
-                             simulationDurationS);
+  return simulation.simulate(newVehicleVelocityMps, accelerationMps,
+                             randomDecelerationMps, vehicleOccupiedSpaceM,
+                             spaceLengthM, carDensity, simulationDurationS);
 }
 
 bool tspAddVehicle(TSP::tsp_id lane, TSP::tsp_int velocity) {

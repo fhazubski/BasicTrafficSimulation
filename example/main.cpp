@@ -34,16 +34,16 @@ int main(int argc, char *argv[]) {
     for (TSP::tsp_float d = 0.8; d >= 0.01;
          d *= (SIMULATE_QUICK ? 0.75 : 0.9)) {
       std::cout << "progress: " << d << std::endl;
-      for (int n = 0; n < (SIMULATE_QUICK ? 10 : 5); n++) {
-        results.push_back(tspSimulate(37.5, 37.5, 7.5, 0.5, 7.5, 1.5, 7500, d,
-                                      (SIMULATE_QUICK ? 500 : 5000)));
+      for (int n = 0; n < (SIMULATE_QUICK ? 3 : 5); n++) {
+        results.push_back(tspSimulate(1.25, 1.25, 0.25, 0.25, 0.5, 7.5, 0.25,
+                                      7500, d, (SIMULATE_QUICK ? 2000 : 5000)));
       }
     }
 
     std::sort(results.begin(), results.end(), simulationResultCompare());
 
     for (auto &result : results) {
-      std::string toSave = std::to_string(result.vehiclesDensity * 8.0) + ";" +
+      std::string toSave = std::to_string(result.vehiclesDensity) + ";" +
                            std::to_string(result.vehiclesPerTime);
       std::replace(toSave.begin(), toSave.end(), '.', ',');
       outCsv << toSave << std::endl;

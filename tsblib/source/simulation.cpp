@@ -67,10 +67,10 @@ bool Simulation::setTime(tsp_float newTime) {
   for (; timeToSet + timeStep <= newTime; timeToSet += timeStep) {
     for (auto &vehicle : vehicles) {
       tsp_int distance = distanceToTheNextVehicle(vehicle);
-      if (distance < vehicle.velocity + maxVelocityChange) {
+      if (distance < vehicle.velocity + maximalAcceleration) {
         vehicle.newVelocity = distance - 1;
-      } else if (distance == vehicle.velocity + maxVelocityChange + 1) {
-        vehicle.newVelocity = vehicle.velocity + maxVelocityChange;
+      } else if (distance == vehicle.velocity + maximalAcceleration + 1) {
+        vehicle.newVelocity = vehicle.velocity + maximalAcceleration;
       } else {
         vehicle.newVelocity = vehicle.velocity;
       }
@@ -84,8 +84,8 @@ bool Simulation::setTime(tsp_float newTime) {
       //          << velocityDecreaseProbability << " " << vehicle->velocity
       //          << std::endl;
       if (randomValue <= velocityDecreaseProbability) {
-        if (vehicle.newVelocity > maxVelocityChange)
-          vehicle.newVelocity -= maxVelocityChange;
+        if (vehicle.newVelocity > randomDeceleration)
+          vehicle.newVelocity -= randomDeceleration;
         else if (vehicle.newVelocity > 0)
           vehicle.newVelocity = 0;
       }
@@ -118,12 +118,11 @@ bool Simulation::setTime(tsp_float newTime) {
   return true;
 }
 
-tsp_simulation_result Simulation::simulate(tsp_float newVehicleVelocityMps,
-                                           tsp_float velocityChangeMps,
-                                           tsp_float vehicleOccupiedSpaceM,
-                                           tsp_float spaceLengthM,
-                                           tsp_float carDensity,
-                                           tsp_float simulationDurationS) {
+tsp_simulation_result
+Simulation::simulate(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
+                     tsp_float randomDecelerationMps,
+                     tsp_float vehicleOccupiedSpaceM, tsp_float spaceLengthM,
+                     tsp_float carDensity, tsp_float simulationDurationS) {
   minimalDistance = std::ceil(vehicleOccupiedSpaceM / spaceLengthM);
   if (minimalDistance < 1) {
     minimalDistance = 1;
@@ -139,21 +138,26 @@ tsp_simulation_result Simulation::simulate(tsp_float newVehicleVelocityMps,
                                     HelperMath::getRandom()) -
                           1;
     newPosition *= minimalDistance;
-    if (addVehicle(0, newPosition, roadLanes[0].maxVelocity)) {
+    if (addVehicle(0, newPosition, newVehicleVelocityMps)) {
       carsLeftToSpawn--;
     }
   }
 
-  maxVelocityChange = std::round(velocityChangeMps / spaceLengthM);
-  std::cout << "TSP min " << minimalDistance << " " << maxVelocityChange << " "
-            << roadLanes[0].maxVelocity << std::endl;
+  maximalAcceleration = std::round(accelerationMps / spaceLengthM);
+  randomDeceleration = std::round(randomDecelerationMps / spaceLengthM);
+  std::cout << "TSP min distance " << minimalDistance << " max acc "
+            << maximalAcceleration << " rand dec " << randomDeceleration
+            << " max vel " << roadLanes[0].maxVelocity << std::endl;
 
   setTime(simulationDurationS * second);
   tsp_simulation_result results;
   if (carsToSpawnCount == 0) {
     results.vehiclesPerTime = 0;
   } else {
-    results.vehiclesPerTime = vehiclesCoveredDistanceM / simulationDurationS;
+    results.vehiclesPerTime =
+        vehiclesCoveredDistanceM /
+        (static_cast<tsp_float>(roadLanes[0].pointsCount) * spaceLengthM) *
+        1000.0 / simulationDurationS;
   }
   results.vehiclesDensity =
       static_cast<tsp_float>(carsToSpawnCount * minimalDistance) /
@@ -210,13 +214,13 @@ void Simulation::overrideAxleAngle(TSP::tsp_id vehicle, TSP::tsp_float angle) {
 */
 
 tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle &vehicle) {
-  for (tsp_int d = 1; d <= vehicle.velocity + maxVelocityChange; d++) {
+  for (tsp_int d = 1; d <= vehicle.velocity + maximalAcceleration; d++) {
     if (roadLanes[vehicle.lane]
             .points[(vehicle.position + d + minimalDistance - 1) %
                     roadLanes[vehicle.lane].pointsCount] != 0)
       return d;
   }
-  return vehicle.velocity + maxVelocityChange + 1;
+  return vehicle.velocity + maximalAcceleration + 1;
 }
 
 } // namespace TSP
