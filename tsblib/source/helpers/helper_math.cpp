@@ -58,6 +58,7 @@ tsp_float HelperMath::lineToRotation(const tsp_position *const line) {
   return std::atan2(line[1].y - line[0].y, line[1].x - line[0].x);
 }
 
+// Returns random number x, where 0 < x <= 1
 tsp_float HelperMath::getRandom() {
   static bool initialize = true;
   if (initialize) {
@@ -66,6 +67,12 @@ tsp_float HelperMath::getRandom() {
   }
   return (static_cast<tsp_float>(rand() + 1) /
           static_cast<tsp_float>(RAND_MAX + 1));
+}
+
+// Returns random integer x, where 0 <= x < max
+tsp_int HelperMath::getRandomInt(tsp_int max) {
+  auto result = std::ceil(static_cast<tsp_float>(max) * getRandom());
+  return static_cast<tsp_int>(result) - 1;
 }
 
 } // namespace TSP

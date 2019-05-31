@@ -1,8 +1,8 @@
 #pragma once
 #include "source/base.h"
-#include <functional>
 #include <cstdlib>
 #include <ctime>
+#include <functional>
 
 using namespace TSP;
 
@@ -24,9 +24,10 @@ public:
                              const tsp_float velocityChange,
                              const tsp_float axleAngleChange,
                              const tsp_float timeChange);
-							 */
+                                                         */
 
   static tsp_float getRandom();
+  static tsp_int getRandomInt(tsp_int max);
 
   static tsp_float lineToRotation(const tsp_position *const line);
 };

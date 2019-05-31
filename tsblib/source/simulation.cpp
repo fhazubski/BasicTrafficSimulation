@@ -53,9 +53,12 @@ bool Simulation::addVehicle(tsp_id startLane, tsp_int startPosition,
 
 tsp_id Simulation::addLane(tsp_float spaceLengthM, tsp_float lengthM,
                            tsp_int maxVelocity) {
-  int spacesCount = std::round(lengthM / spaceLengthM);
-  roadLanes.push_back(tsp_road_lane(spacesCount, spaceLengthM, maxVelocity));
-  return static_cast<tsp_id>(roadLanes.size() - 1);
+  tsp_int spacesCount =
+      static_cast<tsp_int>(std::round(lengthM / spaceLengthM));
+  tsp_id newLaneId = static_cast<tsp_id>(roadLanes.size());
+  roadLanes.push_back(
+      tsp_road_lane(spacesCount, spaceLengthM, maxVelocity, newLaneId));
+  return newLaneId;
 }
 
 bool Simulation::setTime(tsp_float newTime) {
@@ -123,28 +126,34 @@ Simulation::simulate(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
                      tsp_float randomDecelerationMps,
                      tsp_float vehicleOccupiedSpaceM, tsp_float spaceLengthM,
                      tsp_float carDensity, tsp_float simulationDurationS) {
-  minimalDistance = std::ceil(vehicleOccupiedSpaceM / spaceLengthM);
+  minimalDistance =
+      static_cast<tsp_int>(std::ceil(vehicleOccupiedSpaceM / spaceLengthM));
   if (minimalDistance < 1) {
     minimalDistance = 1;
   }
-  tsp_int carsToSpawnCount =
+  tsp_int carsToSpawnCount = static_cast<tsp_int>(
       static_cast<tsp_float>(roadLanes[0].pointsCount / minimalDistance) *
-      carDensity;
+      carDensity);
   std::cout << "TSP to spawn " << carsToSpawnCount << std::endl;
   tsp_int carsLeftToSpawn = carsToSpawnCount;
   while (carsLeftToSpawn > 0) {
-    tsp_float realSpacesCount = roadLanes[0].pointsCount / minimalDistance;
-    tsp_int newPosition = std::ceil(static_cast<tsp_float>(realSpacesCount) *
-                                    HelperMath::getRandom()) -
-                          1;
+    tsp_int realSpacesCount = roadLanes[0].pointsCount / minimalDistance;
+    tsp_int newPosition =
+        static_cast<tsp_int>(std::ceil(static_cast<tsp_float>(realSpacesCount) *
+                                       HelperMath::getRandom())) -
+        1;
     newPosition *= minimalDistance;
-    if (addVehicle(0, newPosition, newVehicleVelocityMps)) {
+    tsp_int newVelocity =
+        static_cast<tsp_int>(newVehicleVelocityMps / spaceLengthM);
+    if (addVehicle(0, newPosition, newVelocity)) {
       carsLeftToSpawn--;
     }
   }
 
-  maximalAcceleration = std::round(accelerationMps / spaceLengthM);
-  randomDeceleration = std::round(randomDecelerationMps / spaceLengthM);
+  maximalAcceleration =
+      static_cast<tsp_int>(std::round(accelerationMps / spaceLengthM));
+  randomDeceleration =
+      static_cast<tsp_int>(std::round(randomDecelerationMps / spaceLengthM));
   std::cout << "TSP min distance " << minimalDistance << " max acc "
             << maximalAcceleration << " rand dec " << randomDeceleration
             << " max vel " << roadLanes[0].maxVelocity << std::endl;
@@ -181,6 +190,7 @@ bool Simulation::setP(tsp_float p) {
     return false;
   }
   velocityDecreaseProbability = p;
+  return true;
 }
 /*
 bool Simulation::addVehicle(tsp_float width, tsp_float height,
