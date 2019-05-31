@@ -99,4 +99,35 @@ struct tsp_simulation_result {
   tsp_float vehiclesDensity;
 };
 
+struct tsp_simulation_data_nasch {
+  tsp_float maxVelocityMps;
+  tsp_float newVehicleVelocityMps;
+  tsp_float accelerationMps;
+  tsp_float randomDecelerationMps;
+  tsp_float velocityDecreaseProbability;
+  tsp_float vehicleOccupiedSpaceM;
+  tsp_float spaceLengthM;
+  tsp_float laneLengthM;
+  tsp_float carDensity;
+  tsp_float simulationDurationS;
+};
+
+struct tsp_simulation_data_knospe {
+  tsp_float maxVelocityMps;
+  tsp_float newVehicleVelocityMps;
+  tsp_float accelerationMps;
+  tsp_float randomDecelerationMps;
+  tsp_float velocityDecreaseProbabilityB;
+  tsp_float velocityDecreaseProbability0;
+  tsp_float velocityDecreaseProbabilityD;
+  tsp_float safeTimeHeadwayS;
+  tsp_float vehicleOccupiedSpaceM;
+  tsp_float spaceLengthM;
+  tsp_float safetyGapM;
+  tsp_int laneCount;
+  tsp_float laneLengthM;
+  tsp_float carDensity;
+  tsp_float simulationDurationS;
+};
+
 } // namespace TSP

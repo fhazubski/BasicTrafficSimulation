@@ -38,6 +38,7 @@ include(tslib.pri)
 
 HEADERS += \
     simulation.h \
+    simulationdata.h \
     vehicle.h \
     checkerboard.h \
     obstacles.h \

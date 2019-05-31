@@ -2,6 +2,7 @@
 #include "globals.h"
 #include "obstacles.h"
 #include "simulation.h"
+#include "simulationdata.h"
 #include "simulationview.h"
 #include "tslib/api.h"
 #include "vehicle.h"
@@ -23,60 +24,40 @@ struct simulationResultCompare {
   }
 };
 
+template <typename T> void simulateAndSave(const char *filename, T data) {
+  std::ofstream outCsv;
+  outCsv.open(filename);
+  std::vector<TSP::tsp_simulation_result> results;
+  data.simulationDurationS = (SIMULATE_QUICK ? 200 : 1000);
+  for (TSP::tsp_float d = 0.8; d >= 0.01; d -= (SIMULATE_QUICK ? 0.05 : 0.01)) {
+    std::cout << "progress: " << d << std::endl;
+    data.carDensity = d;
+    for (int n = 0; n < (SIMULATE_QUICK ? 10 : 10); n++) {
+      results.push_back(tspSimulate(data));
+    }
+  }
+
+  std::sort(results.begin(), results.end(), simulationResultCompare());
+
+  for (auto &result : results) {
+    std::string toSave = std::to_string(result.vehiclesDensity) + ";" +
+                         std::to_string(result.vehiclesPerTime);
+    std::replace(toSave.begin(), toSave.end(), '.', ',');
+    outCsv << toSave << std::endl;
+  }
+  outCsv.close();
+}
+
 int main(int argc, char *argv[]) {
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QGuiApplication app(argc, argv);
   QQmlApplicationEngine engine;
 
   if (SIMULATE_AND_SAVE_TO_FILE) {
-    std::ofstream outCsv;
-    outCsv.open("symulacja.csv");
-    std::vector<TSP::tsp_simulation_result> results;
-    for (TSP::tsp_float d = 0.8; d >= 0.01;
-         d -= (SIMULATE_QUICK ? 0.05 : 0.01)) {
-      std::cout << "progress: " << d << std::endl;
-      /*
-            TSP::tsp_simulation_result TSLIB_EXPORT tspSimulate(
-                TSP::tsp_float maxVelocityMps, TSP::tsp_float
-         newVehicleVelocityMps, TSP::tsp_float accelerationMps, TSP::tsp_float
-         randomDecelerationMps, TSP::tsp_float velocityDecreaseProbability,
-                TSP::tsp_float vehicleOccupiedSpaceM, TSP::tsp_float
-         spaceLengthM, TSP::tsp_float laneLengthM, TSP::tsp_float carDensity,
-                TSP::tsp_float simulationDurationS);
-
-      TSP::tsp_simulation_result TSLIB_EXPORT tspSimulateKnospe(
-          TSP::tsp_float maxVelocityMps, TSP::tsp_float newVehicleVelocityMps,
-          TSP::tsp_float accelerationMps, TSP::tsp_float randomDecelerationMps,
-          TSP::tsp_float velocityDecreaseProbabilityB,
-          TSP::tsp_float velocityDecreaseProbability0,
-          TSP::tsp_float velocityDecreaseProbabilityD,
-          TSP::tsp_float safeTimeHeadwayS, TSP::tsp_float vehicleOccupiedSpaceM,
-          TSP::tsp_float spaceLengthM, TSP::tsp_float safetyGapM,
-          TSP::tsp_int laneCount, TSP::tsp_float laneLengthM,
-          TSP::tsp_float carDensity, TSP::tsp_float simulationDurationS);
-      */
-      for (int n = 0; n < (SIMULATE_QUICK ? 10 : 5); n++) {
-        if (SIMULATE_KNOSPE) {
-          results.push_back(tspSimulateKnospe(30, 30, 1.5, 1.5, 0.94, 0.5, 0.1,
-                                              6, 7.5, 1.5, 10.5, 2, 1000, d,
-                                              (SIMULATE_QUICK ? 200 : 1000)));
-        } else {
-          results.push_back(tspSimulateNaSch(30, 30, 1.5, 1.5, 0.1, 7.5, 1.5,
-                                             1000, d,
-                                             (SIMULATE_QUICK ? 2000 : 1000)));
-        }
-      }
-    }
-
-    std::sort(results.begin(), results.end(), simulationResultCompare());
-
-    for (auto &result : results) {
-      std::string toSave = std::to_string(result.vehiclesDensity) + ";" +
-                           std::to_string(result.vehiclesPerTime);
-      std::replace(toSave.begin(), toSave.end(), '.', ',');
-      outCsv << toSave << std::endl;
-    }
-    outCsv.close();
+    simulateAndSave("NaSchP01.csv", DataNaSch());
+    simulateAndSave("NaSchP05.csv", DataNaSchP05());
+    simulateAndSave("NaSchLikeKnospe.csv", DataNaSchLikeKnospe());
+    simulateAndSave("Knospe.csv", DataKnospe());
     return 0;
   }
   Simulation simulation;
