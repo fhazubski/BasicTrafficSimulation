@@ -1,8 +1,11 @@
 #include "source/simulation_knospe.h"
 #include "source/helpers/helper_math.h"
+#include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <iostream>
 #include <iterator>
+#include <vector>
 
 namespace TSP {
 
@@ -12,8 +15,8 @@ bool SimulationKnospe::addVehicle(tsp_id startLane, tsp_int startPosition,
   // std::cout << "TSP: lane " << startLane << " " << roadLanes.size()
   //          << std::endl;
   if (startLane >= roadLanes.size() ||
-      startPosition >= roadLanes[startLane].pointsCount ||
-      roadLanes[startLane].points[startPosition] != 0) {
+      startPosition >= roadLanes[startLane]->pointsCount ||
+      roadLanes[startLane]->points[startPosition] != 0) {
     return false;
   }
 
@@ -25,7 +28,7 @@ bool SimulationKnospe::addVehicle(tsp_id startLane, tsp_int startPosition,
   vehicle.safeTimeHeadwayS = safeTimeHeadwayS;
   vehicle.safetyGap = safetyGap;
   vehicles.push_back(vehicle);
-  roadLanes[startLane].points[startPosition] = vehicles.back().id;
+  roadLanes[startLane]->points[startPosition] = vehicle.id;
 
   // std::cout << "TSP: new vehicles size: " << vehicles.size() << std::endl;
 
@@ -39,7 +42,7 @@ tsp_id SimulationKnospe::addLane(tsp_float spaceLengthM, tsp_float lengthM,
   for (int i = 0; i < laneCount; i++) {
     tsp_id newLaneId = static_cast<tsp_id>(roadLanes.size());
     roadLanes.push_back(
-        tsp_road_lane(spacesCount, spaceLengthM, maxVelocity, newLaneId));
+        new tsp_road_lane(spacesCount, spaceLengthM, maxVelocity, newLaneId));
   }
   return static_cast<tsp_id>(roadLanes.size() - 1);
 }
@@ -68,30 +71,27 @@ bool SimulationKnospe::setTime(tsp_float newTime) {
 
       // Step 1
       if ((!isNextBreaking && !vehicle.isBreaking) || isSafeTimeHeadway) {
-        if (vehicle.velocity < roadLanes[vehicle.lane].maxVelocity) {
-          vehicle.newVelocity = vehicle.velocity + 1;
-        } else {
-          vehicle.newVelocity = vehicle.velocity;
-        }
+        vehicle.newVelocity = std::min(vehicle.velocity + 1,
+                                       roadLanes[vehicle.lane]->maxVelocity);
       } else {
         vehicle.newVelocity = vehicle.velocity;
       }
-
+      // Step 2
       tsp_int distance = distanceToTheNextVehicle(vehicle);
+      assert(distance >= 0);
       tsp_int effectiveDistance =
           distance + std::max(anticipatedVelocity(vehicle) - vehicle.safetyGap,
                               static_cast<tsp_int>(0));
-
       vehicle.newVelocity = std::min(effectiveDistance, vehicle.newVelocity);
-      if (vehicle.newVelocity < vehicle.newVelocity) {
+
+      if (vehicle.newVelocity < vehicle.velocity) {
         vehicle.newIsBreaking = true;
       }
 
       // Step 3
-      auto randomValue = HelperMath::getRandom();
-      if (randomValue <= decelerationProbability) {
-        vehicle.newVelocity = std::max(vehicle.newVelocity - randomDeceleration,
-                                       static_cast<tsp_int>(0));
+      if (HelperMath::getRandom() <= decelerationProbability) {
+        vehicle.newVelocity =
+            std::max(vehicle.newVelocity - 1, static_cast<tsp_int>(0));
         if (isNextBreaking && !isSafeTimeHeadway) {
           vehicle.newIsBreaking = true;
         }
@@ -103,14 +103,14 @@ bool SimulationKnospe::setTime(tsp_float newTime) {
       vehicle.velocity = vehicle.newVelocity;
       vehicle.isBreaking = vehicle.newIsBreaking;
       if (vehicle.velocity > 0) {
-        roadLanes[vehicle.lane].points[vehicle.position] = 0;
+        roadLanes[vehicle.lane]->points[vehicle.position] = 0;
         vehicle.position += vehicle.velocity;
         vehiclesCoveredDistanceM += static_cast<tsp_float>(vehicle.velocity) *
-                                    roadLanes[vehicle.lane].spaceLengthM;
-        if (vehicle.position >= roadLanes[vehicle.lane].pointsCount) {
-          vehicle.position -= roadLanes[vehicle.lane].pointsCount;
+                                    roadLanes[vehicle.lane]->spaceLengthM;
+        if (vehicle.position >= roadLanes[vehicle.lane]->pointsCount) {
+          vehicle.position -= roadLanes[vehicle.lane]->pointsCount;
         }
-        roadLanes[vehicle.lane].points[vehicle.position] = vehicle.id;
+        roadLanes[vehicle.lane]->points[vehicle.position] = vehicle.id;
       }
     }
   }
@@ -134,21 +134,31 @@ tsp_simulation_result SimulationKnospe::simulate(
       static_cast<tsp_int>(std::ceil(safetyGapM / spaceLengthM));
   for (auto lane : roadLanes) {
     tsp_float realSpacesCount =
-        static_cast<tsp_float>(lane.pointsCount / minimalDistance);
+        static_cast<tsp_float>(lane->pointsCount / minimalDistance);
     tsp_int carsLeftToSpawn =
         static_cast<tsp_int>(realSpacesCount * carDensity);
     carsToSpawnCount += carsLeftToSpawn;
     std::cout << "TSP to spawn " << carsLeftToSpawn << std::endl;
+    tsp_int newVelocity =
+        static_cast<tsp_int>(newVehicleVelocityMps / spaceLengthM);
+    std::vector<tsp_int> positions(carsLeftToSpawn);
     while (carsLeftToSpawn > 0) {
       tsp_int newPosition =
-          HelperMath::getRandomInt(static_cast<tsp_int>(realSpacesCount));
-      newPosition *= minimalDistance;
-      tsp_int newVelocity =
-          static_cast<tsp_int>(newVehicleVelocityMps / spaceLengthM);
-      if (addVehicle(lane.id, newPosition, newVelocity, safeTimeHeadwayS,
+          HelperMath::getRandomInt(static_cast<tsp_int>(realSpacesCount)) *
+          minimalDistance;
+      if (addVehicle(lane->id, newPosition, newVelocity, safeTimeHeadwayS,
                      safetyGap)) {
         carsLeftToSpawn--;
+        positions[carsLeftToSpawn] = newPosition;
       }
+    }
+    std::sort(positions.begin(), positions.end());
+    positions.push_back(positions[0]);
+    for (size_t i = 0; i < positions.size() - 1; i++) {
+      tsp_vehicle &previousVehicle = vehicles[lane->points[positions[i]] - 1];
+      tsp_vehicle &nextVehicle = vehicles[lane->points[positions[i + 1]] - 1];
+      previousVehicle.nextVehicle = nextVehicle.id;
+      nextVehicle.previousVehicle = previousVehicle.id;
     }
   }
 
@@ -158,7 +168,7 @@ tsp_simulation_result SimulationKnospe::simulate(
       static_cast<tsp_int>(std::round(randomDecelerationMps / spaceLengthM));
   std::cout << "TSP min distance " << minimalDistance << " max acc "
             << maximalAcceleration << " rand dec " << randomDeceleration
-            << " max vel " << roadLanes[0].maxVelocity << std::endl;
+            << " max vel " << roadLanes[0]->maxVelocity << std::endl;
 
   setTime(simulationDurationS * second);
   tsp_simulation_result results;
@@ -168,14 +178,14 @@ tsp_simulation_result SimulationKnospe::simulate(
     tsp_float allRoadsDistance = 0;
     for (auto lane : roadLanes) {
       allRoadsDistance +=
-          static_cast<tsp_float>(lane.pointsCount) * spaceLengthM;
+          static_cast<tsp_float>(lane->pointsCount) * spaceLengthM;
     }
     results.vehiclesPerTime = vehiclesCoveredDistanceM / allRoadsDistance *
                               1000.0 / simulationDurationS;
   }
   results.vehiclesDensity =
       static_cast<tsp_float>(carsToSpawnCount * minimalDistance) /
-      static_cast<tsp_float>(roadLanes[0].pointsCount * roadLanes.size());
+      static_cast<tsp_float>(roadLanes[0]->pointsCount * roadLanes.size());
   std::cout << "TSP: results: " << results.vehiclesPerTime << " "
             << results.vehiclesDensity << std::endl;
   return results;
@@ -216,60 +226,29 @@ bool SimulationKnospe::setPd(tsp_float pd) {
 }
 
 tsp_int SimulationKnospe::distanceToTheNextVehicle(tsp_vehicle &vehicle) {
-  for (tsp_int d = 1; d <= vehicle.velocity + maximalAcceleration; d++) {
-    if (roadLanes[vehicle.lane]
-            .points[(vehicle.position + d + minimalDistance - 1) %
-                    roadLanes[vehicle.lane].pointsCount] != 0)
-      return d;
+  if (vehicles[vehicle.nextVehicle - 1].position < vehicle.position) {
+    return vehicles[vehicle.nextVehicle - 1].position +
+           roadLanes[vehicle.lane]->pointsCount - vehicle.position -
+           minimalDistance;
   }
-  return vehicle.velocity + maximalAcceleration + 1;
+  return vehicles[vehicle.nextVehicle - 1].position - vehicle.position -
+         minimalDistance;
 }
 
 tsp_int SimulationKnospe::anticipatedVelocity(tsp_vehicle &vehicle) {
-  for (tsp_int d = 1; d <= roadLanes[vehicle.lane].maxVelocity; d++) {
-    tsp_int nextPointToCheck = (vehicle.position + d + minimalDistance) %
-                               roadLanes[vehicle.lane].pointsCount;
-    tsp_int vehicleId = roadLanes[vehicle.lane].points[nextPointToCheck];
-    if (vehicleId != 0) {
-      tsp_int vehicleDistance =
-          distanceToTheNextVehicle(vehicles[vehicleId - 1]);
-      return std::min(vehicleDistance, vehicles[vehicleId - 1].velocity);
-    }
-  }
-  return 0;
+  auto &nextVehicle = vehicles[vehicle.nextVehicle - 1];
+  return std::min(distanceToTheNextVehicle(nextVehicle), nextVehicle.velocity);
 }
 
 bool SimulationKnospe::isWithinSafeTimeHeadway(tsp_vehicle &vehicle) {
-  tsp_int d = 0;
-  while (static_cast<tsp_float>(d) <
-         std::min(static_cast<tsp_float>(vehicle.velocity),
-                  vehicle.safeTimeHeadwayS) *
-             static_cast<tsp_float>(vehicle.velocity)) {
-    tsp_int nextPointToCheck = (vehicle.position + d + minimalDistance) %
-                               roadLanes[vehicle.lane].pointsCount;
-    if (roadLanes[vehicle.lane].points[nextPointToCheck] != 0) {
-      return false;
-    }
-    d++;
-  }
-  return true;
+  auto gap = distanceToTheNextVehicle(vehicle);
+  tsp_float timeHeadwayS =
+      static_cast<tsp_float>(gap) / static_cast<tsp_float>(vehicle.velocity);
+  return (timeHeadwayS >= vehicle.safeTimeHeadwayS);
 }
 
 bool SimulationKnospe::isNextVehicleBreaking(tsp_vehicle &vehicle) {
-  tsp_int d = 0;
-  while (static_cast<tsp_float>(d) <
-         std::min(static_cast<tsp_float>(vehicle.velocity),
-                  vehicle.safeTimeHeadwayS) *
-             static_cast<tsp_float>(vehicle.velocity)) {
-    tsp_int nextPointToCheck = (vehicle.position + d + minimalDistance) %
-                               roadLanes[vehicle.lane].pointsCount;
-    tsp_int vehicleId = roadLanes[vehicle.lane].points[nextPointToCheck];
-    if (vehicleId != 0) {
-      return vehicles[vehicleId - 1].isBreaking;
-    }
-    d++;
-  }
-  return false;
+  return vehicles[vehicle.nextVehicle - 1].isBreaking;
 }
 
 } // namespace TSP

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <vector>
 
 namespace TSP {
 
@@ -34,11 +35,11 @@ struct tsp_road_lane {
                 const tsp_int maxVelocity, const tsp_id id)
       : pointsCount(pointsCount), spaceLengthM(spaceLengthM),
         maxVelocity(maxVelocity), id(id) {
-    points = new tsp_int[pointsCount];
-    std::fill_n(points, pointsCount, 0);
+    points.resize(pointsCount);
+    std::fill(points.begin(), points.end(), 0);
   }
   const tsp_int pointsCount;
-  tsp_int *points;
+  std::vector<tsp_int> points;
   const tsp_float spaceLengthM;
   const tsp_int maxVelocity;
   const tsp_id id;
@@ -85,6 +86,8 @@ struct tsp_vehicle : tsp_vehicle_position {
   tsp_int velocity;
   tsp_int newVelocity;
   tsp_id id;
+  tsp_id nextVehicle = 0;
+  tsp_id previousVehicle = 0;
   tsp_float safeTimeHeadwayS = 0.0;
   bool isBreaking = false;
   bool newIsBreaking;

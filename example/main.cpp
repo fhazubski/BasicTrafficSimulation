@@ -13,8 +13,8 @@
 #include <iostream>
 
 #define SIMULATE_AND_SAVE_TO_FILE 1
-#define SIMULATE_QUICK 1
-#define SIMULATE_KNOSPE 1
+#define SIMULATE_QUICK 0
+#define SIMULATE_KNOSPE 0
 
 struct simulationResultCompare {
   inline bool operator()(const TSP::tsp_simulation_result &result1,
@@ -57,11 +57,11 @@ int main(int argc, char *argv[]) {
       */
       for (int n = 0; n < (SIMULATE_QUICK ? 10 : 5); n++) {
         if (SIMULATE_KNOSPE) {
-          results.push_back(tspSimulateKnospe(30, 30, 1, 5, 0.94, 0.5, 0.1, 6,
-                                              1.5, 1.5, 10.5, 2, 1000, d * 0.33,
+          results.push_back(tspSimulateKnospe(30, 30, 1.5, 1.5, 0.94, 0.5, 0.1,
+                                              6, 7.5, 1.5, 10.5, 2, 1000, d,
                                               (SIMULATE_QUICK ? 200 : 1000)));
         } else {
-          results.push_back(tspSimulateNaSch(37.5, 37.5, 2.5, 2.5, 0.1, 5, 0.25,
+          results.push_back(tspSimulateNaSch(30, 30, 1.5, 1.5, 0.1, 7.5, 1.5,
                                              1000, d,
                                              (SIMULATE_QUICK ? 2000 : 1000)));
         }
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
     std::sort(results.begin(), results.end(), simulationResultCompare());
 
     for (auto &result : results) {
-      std::string toSave = std::to_string(result.vehiclesDensity * 3.0) + ";" +
+      std::string toSave = std::to_string(result.vehiclesDensity) + ";" +
                            std::to_string(result.vehiclesPerTime);
       std::replace(toSave.begin(), toSave.end(), '.', ',');
       outCsv << toSave << std::endl;

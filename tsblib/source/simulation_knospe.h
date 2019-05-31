@@ -6,6 +6,11 @@ namespace TSP {
 
 class SimulationKnospe {
 public:
+  ~SimulationKnospe() {
+    for (auto lane : roadLanes) {
+      delete lane;
+    }
+  }
   bool addVehicle(tsp_id startLane, tsp_int startPosition, tsp_int velocity,
                   tsp_float safeHeadwayTimeS, tsp_int safetyGap);
   tsp_id addLane(tsp_float spaceLengthM, tsp_float lengthM, tsp_int laneCount,
@@ -23,10 +28,10 @@ public:
            tsp_float safeTimeHeadwayS);
 
 private:
-  tsp_int distanceToTheNextVehicle(tsp_vehicle &vehicle);
+  inline tsp_int distanceToTheNextVehicle(tsp_vehicle &vehicle);
   tsp_int anticipatedVelocity(tsp_vehicle &vehicle);
   bool isWithinSafeTimeHeadway(tsp_vehicle &vehicle);
-  bool isNextVehicleBreaking(tsp_vehicle &vehicle);
+  inline bool isNextVehicleBreaking(tsp_vehicle &vehicle);
 
   tsp_float time = 0;
   tsp_float velocityDecreaseProbabilityWhenNextIsBreaking = 0;
@@ -38,7 +43,7 @@ private:
   tsp_int minimalDistance;
   const tsp_float timeStep = second;
 
-  std::vector<tsp_road_lane> roadLanes;
+  std::vector<tsp_road_lane *> roadLanes;
   std::vector<tsp_vehicle> vehicles;
 };
 
