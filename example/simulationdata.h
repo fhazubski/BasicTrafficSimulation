@@ -48,7 +48,12 @@ struct DataKnospe : TSP::tsp_simulation_data_knospe {
     safetyGapM = 10.5;
     laneCount = 2;
     laneLengthM = 1000;
+    allowLaneChanging = true;
   }
+};
+
+struct DataKnospeWithoutLaneChanging : DataKnospe {
+  DataKnospeWithoutLaneChanging() { allowLaneChanging = false; }
 };
 
 #endif // SIMULATIONDATA_H

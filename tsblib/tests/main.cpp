@@ -17,9 +17,18 @@ int main() {
   simulationData.laneLengthM = 1000;
   simulationData.carDensity = 0.3;
   simulationData.simulationDurationS = 500;
+  simulationData.allowLaneChanging = true;
 
-  for (int i = 0; i < 200; i++) {
+  for (int i = 0; i < 20; i++) {
     tspSimulate(simulationData);
   }
+
+  simulationData.simulationDurationS = 10000;
+  simulationData.carDensity = 0.015;
+  tspSimulate(simulationData);
+  simulationData.carDensity = 0.010;
+  tspSimulate(simulationData);
+  simulationData.carDensity = 0.005;
+  tspSimulate(simulationData);
   return 0;
 }

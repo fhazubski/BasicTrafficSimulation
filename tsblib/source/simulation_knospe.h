@@ -25,13 +25,22 @@ public:
            tsp_float randomDecelerationMps, tsp_float vehicleOccupiedSpaceM,
            tsp_float spaceLengthM, TSP::tsp_float safetyGapM,
            tsp_float carDensity, tsp_float simulationDurationS,
-           tsp_float safeTimeHeadwayS);
+           tsp_float safeTimeHeadwayS, bool a_allowLaneChanging);
 
 private:
   inline tsp_int distanceToTheNextVehicle(tsp_vehicle &vehicle);
   tsp_int anticipatedVelocity(tsp_vehicle &vehicle);
   bool isWithinSafeTimeHeadway(tsp_vehicle &vehicle);
   inline bool isNextVehicleBreaking(tsp_vehicle &vehicle);
+  bool canChangeLaneRightToLeft(tsp_vehicle &vehicle);
+  bool canChangeLaneLeftToRight(tsp_vehicle &vehicle);
+  bool getSafetyCriterionOfLaneChanging(tsp_vehicle &vehicle, tsp_int dPred,
+                                        bool rightToLeft);
+  tsp_int distanceToThePredecessorOnAnotherLane(tsp_vehicle &vehicle,
+                                                bool rightToLeft);
+  tsp_vehicle &predecessorVehicle(tsp_vehicle &vehicle, tsp_int dPred,
+                                  bool rightToLeft);
+  tsp_vehicle &getNextVehicle(tsp_vehicle &vehicle);
 
   tsp_float time = 0;
   tsp_float velocityDecreaseProbabilityWhenNextIsBreaking = 0;
@@ -42,6 +51,7 @@ private:
   tsp_int randomDeceleration;
   tsp_int minimalDistance;
   const tsp_float timeStep = second;
+  bool allowLaneChanging;
 
   std::vector<tsp_road_lane *> roadLanes;
   std::vector<tsp_vehicle> vehicles;

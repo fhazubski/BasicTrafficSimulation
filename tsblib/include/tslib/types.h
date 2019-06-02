@@ -43,6 +43,7 @@ struct tsp_road_lane {
   const tsp_float spaceLengthM;
   const tsp_int maxVelocity;
   const tsp_id id;
+  tsp_int vehiclesCount = 0;
   // const tsp_position *points;
 };
 
@@ -92,6 +93,7 @@ struct tsp_vehicle : tsp_vehicle_position {
   bool isBreaking = false;
   bool newIsBreaking;
   tsp_int safetyGap = 0;
+  tsp_id newLane;
 };
 
 struct tsp_simulation_result {
@@ -128,6 +130,7 @@ struct tsp_simulation_data_knospe {
   tsp_float laneLengthM;
   tsp_float carDensity;
   tsp_float simulationDurationS;
+  bool allowLaneChanging = true;
 };
 
 } // namespace TSP

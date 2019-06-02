@@ -57,6 +57,8 @@ int main(int argc, char *argv[]) {
     simulateAndSave("NaSchP01.csv", DataNaSch());
     simulateAndSave("NaSchP05.csv", DataNaSchP05());
     simulateAndSave("NaSchLikeKnospe.csv", DataNaSchLikeKnospe());
+    simulateAndSave("KnospeWithoutLaneChanging.csv",
+                    DataKnospeWithoutLaneChanging());
     simulateAndSave("Knospe.csv", DataKnospe());
     return 0;
   }

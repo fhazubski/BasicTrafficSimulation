@@ -26,11 +26,11 @@ TSP::tsp_simulation_result tspSimulate(TSP::tsp_simulation_data_knospe data) {
   simulation.setPb(data.velocityDecreaseProbabilityB);
   simulation.setP0(data.velocityDecreaseProbability0);
   simulation.setPd(data.velocityDecreaseProbabilityD);
-  return simulation.simulate(data.newVehicleVelocityMps, data.accelerationMps,
-                             data.randomDecelerationMps,
-                             data.vehicleOccupiedSpaceM, data.spaceLengthM,
-                             data.safetyGapM, data.carDensity,
-                             data.simulationDurationS, data.safeTimeHeadwayS);
+  return simulation.simulate(
+      data.newVehicleVelocityMps, data.accelerationMps,
+      data.randomDecelerationMps, data.vehicleOccupiedSpaceM, data.spaceLengthM,
+      data.safetyGapM, data.carDensity, data.simulationDurationS,
+      data.safeTimeHeadwayS, data.allowLaneChanging);
 }
 
 bool tspAddVehicle(TSP::tsp_id lane, TSP::tsp_int velocity) {
