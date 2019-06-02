@@ -304,43 +304,27 @@ bool SimulationKnospe::canChangeLaneRightToLeft(tsp_vehicle &vehicle) {
   bool incentiveCriterion =
       !vehicle.isBreaking &&
       (vehicle.velocity > distanceToTheNextVehicle(vehicle));
+  if (!incentiveCriterion) {
+    return false;
+  }
   if (roadLanes[vehicle.lane + 1]->vehiclesCount == 0) {
-    return incentiveCriterion;
+    return true;
   }
   tsp_int dPred = distanceToThePredecessorOnAnotherLane(vehicle, true);
-  if (dPred + 1 < minimalDistance) {
+  if (!isThereEnoughSpaceForLaneChange(vehicle, dPred, true)) {
     return false;
   }
-  auto &predVehicle = predecessorVehicle(vehicle, dPred, true);
-  tsp_int dSucc =
-      distanceToTheNextVehicle(vehicles[predVehicle.previousVehicle - 1]) -
-      dPred - 1;
-  if (dSucc + 1 < minimalDistance) {
-    return false;
-  }
-  return incentiveCriterion &&
-         getSafetyCriterionOfLaneChanging(vehicle, dPred, true);
+  return getSafetyCriterionOfLaneChanging(vehicle, dPred, true);
 }
 bool SimulationKnospe::canChangeLaneLeftToRight(tsp_vehicle &vehicle) {
   if (vehicle.lane == 0) {
     return false;
   }
   if (roadLanes[vehicle.lane - 1]->vehiclesCount == 0) {
-    return !vehicle.isBreaking &&
-           (vehicle.velocity > distanceToTheNextVehicle(vehicle));
-  }
-  if (roadLanes[vehicle.lane - 1]->vehiclesCount == 0) {
     return true;
   }
   tsp_int dPred = distanceToThePredecessorOnAnotherLane(vehicle, false);
-  if (dPred + 1 < minimalDistance) {
-    return false;
-  }
-  auto &predVehicle = predecessorVehicle(vehicle, dPred, false);
-  tsp_int dSucc =
-      distanceToTheNextVehicle(vehicles[predVehicle.previousVehicle - 1]) -
-      dPred - 1;
-  if (dSucc + 1 < minimalDistance) {
+  if (!isThereEnoughSpaceForLaneChange(vehicle, dPred, false)) {
     return false;
   }
   tsp_float headwayPred =
@@ -351,7 +335,7 @@ bool SimulationKnospe::canChangeLaneLeftToRight(tsp_vehicle &vehicle) {
   bool incentiveCriterion =
       !vehicle.isBreaking && (headwayPred > 3.0) &&
       ((headway > 6.0) ||
-       (vehicle.velocity > distanceToTheNextVehicle(predVehicle)));
+       (vehicle.velocity > distanceToTheNextVehicle(vehicle)));
   return incentiveCriterion &&
          getSafetyCriterionOfLaneChanging(vehicle, dPred, false);
 }
@@ -359,7 +343,7 @@ bool SimulationKnospe::canChangeLaneLeftToRight(tsp_vehicle &vehicle) {
 bool SimulationKnospe::getSafetyCriterionOfLaneChanging(tsp_vehicle &vehicle,
                                                         tsp_int dPred,
                                                         bool rightToLeft) {
-  auto predVehicle = predecessorVehicle(vehicle, dPred, rightToLeft);
+  auto &predVehicle = predecessorVehicle(vehicle, dPred, rightToLeft);
   auto &succVehicle = vehicles[predVehicle.previousVehicle - 1];
   tsp_int dSucc = distanceToTheNextVehicle(succVehicle) - dPred - 1;
   tsp_int anticipatedVelocityPred =
@@ -372,10 +356,9 @@ bool SimulationKnospe::getSafetyCriterionOfLaneChanging(tsp_vehicle &vehicle,
   return safetyCriterion;
 }
 
-tsp_int
-SimulationKnospe::distanceToThePredecessorOnAnotherLane(tsp_vehicle &vehicle,
-                                                        bool rightToLeft) {
-  tsp_int destinationLane = vehicle.lane + (rightToLeft ? 1 : -1);
+tsp_int SimulationKnospe::distanceToThePredecessorOnAnotherLane(
+    tsp_vehicle &vehicle, bool predecessorIsOnTheLeft) {
+  tsp_int destinationLane = vehicle.lane + (predecessorIsOnTheLeft ? 1 : -1);
   tsp_int dPred = 0;
   // TODO optimize
   while (true) {
@@ -383,7 +366,7 @@ SimulationKnospe::distanceToThePredecessorOnAnotherLane(tsp_vehicle &vehicle,
       if (dPred < 0) {
         dPred += roadLanes[destinationLane]->pointsCount;
       }
-      return dPred - 1;
+      return dPred - minimalDistance;
     }
     dPred++;
     if (dPred == 0) {
@@ -396,11 +379,27 @@ SimulationKnospe::distanceToThePredecessorOnAnotherLane(tsp_vehicle &vehicle,
   }
 }
 
+bool SimulationKnospe::isThereEnoughSpaceForLaneChange(
+    tsp_vehicle &vehicle, tsp_int dPred, bool predecessorIsOnTheLeft) {
+  if (dPred < 0) {
+    return false;
+  }
+  auto &predVehicle =
+      predecessorVehicle(vehicle, dPred, predecessorIsOnTheLeft);
+  tsp_int dSucc =
+      distanceToTheNextVehicle(vehicles[predVehicle.previousVehicle - 1]) -
+      dPred - 1;
+  if (dSucc + 1 < minimalDistance) {
+    return false;
+  }
+  return true;
+}
+
 tsp_vehicle &SimulationKnospe::predecessorVehicle(tsp_vehicle &vehicle,
                                                   tsp_int dPred,
-                                                  bool rightToLeft) {
-  tsp_int destinationLane = vehicle.lane + (rightToLeft ? 1 : -1);
-  tsp_int predVehicleOffset = dPred + 1;
+                                                  bool predecessorIsOnTheLeft) {
+  tsp_int destinationLane = vehicle.lane + (predecessorIsOnTheLeft ? 1 : -1);
+  tsp_int predVehicleOffset = dPred + minimalDistance;
   if (vehicle.position + predVehicleOffset >=
       roadLanes[destinationLane]->pointsCount) {
     predVehicleOffset -= roadLanes[destinationLane]->pointsCount;

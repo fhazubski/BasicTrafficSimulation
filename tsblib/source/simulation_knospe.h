@@ -37,9 +37,11 @@ private:
   bool getSafetyCriterionOfLaneChanging(tsp_vehicle &vehicle, tsp_int dPred,
                                         bool rightToLeft);
   tsp_int distanceToThePredecessorOnAnotherLane(tsp_vehicle &vehicle,
-                                                bool rightToLeft);
+                                                bool predecessorIsOnTheLeft);
+  bool isThereEnoughSpaceForLaneChange(tsp_vehicle &vehicle, tsp_int dPred,
+                                       bool predecessorIsOnTheLeft);
   tsp_vehicle &predecessorVehicle(tsp_vehicle &vehicle, tsp_int dPred,
-                                  bool rightToLeft);
+                                  bool predecessorIsOnTheLeft);
   tsp_vehicle &getNextVehicle(tsp_vehicle &vehicle);
 
   tsp_float time = 0;
