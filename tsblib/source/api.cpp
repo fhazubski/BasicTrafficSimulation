@@ -12,10 +12,10 @@ TSP::tsp_simulation_result tspSimulate(TSP::tsp_simulation_data_nasch data) {
                      static_cast<tsp_int>(
                          std::round(data.maxVelocityMps / data.spaceLengthM)));
   simulation.setP(data.velocityDecreaseProbability);
-  return simulation.simulate(data.newVehicleVelocityMps, data.accelerationMps,
-                             data.randomDecelerationMps,
-                             data.vehicleOccupiedSpaceM, data.spaceLengthM,
-                             data.carDensity, data.simulationDurationS);
+  return simulation.simulate(
+      data.newVehicleVelocityMps, data.accelerationMps,
+      data.randomDecelerationMps, data.vehicleOccupiedSpaceM, data.spaceLengthM,
+      data.carDensity, data.simulationDurationS, data.autonomousCarsPercent);
 }
 
 TSP::tsp_simulation_result tspSimulate(TSP::tsp_simulation_data_knospe data) {

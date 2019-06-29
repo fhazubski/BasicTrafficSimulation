@@ -4,6 +4,33 @@ int main() {
 #ifdef NDEBUG
   for (int i = 0; i < 100; i++) {
 #endif
+    TSP::tsp_simulation_data_nasch simulationDataNaSch;
+    simulationDataNaSch.maxVelocityMps = 37.5;
+    simulationDataNaSch.newVehicleVelocityMps = 37.5;
+    simulationDataNaSch.accelerationMps = 7.5;
+    simulationDataNaSch.randomDecelerationMps = 7.5;
+    simulationDataNaSch.velocityDecreaseProbability = 0.3;
+    simulationDataNaSch.vehicleOccupiedSpaceM = 7.5;
+    simulationDataNaSch.spaceLengthM = 7.5;
+    simulationDataNaSch.laneLengthM = 1000;
+    simulationDataNaSch.carDensity = 0.33;
+    simulationDataNaSch.simulationDurationS = 200;
+    simulationDataNaSch.autonomousCarsPercent = 0.0;
+
+    for (int i = 0; i < 20; i++) {
+      tspSimulate(simulationDataNaSch);
+    }
+
+    simulationDataNaSch.autonomousCarsPercent = 0.5;
+    for (int i = 0; i < 20; i++) {
+      tspSimulate(simulationDataNaSch);
+    }
+
+    simulationDataNaSch.autonomousCarsPercent = 1.0;
+    for (int i = 0; i < 20; i++) {
+      tspSimulate(simulationDataNaSch);
+    }
+
     TSP::tsp_simulation_data_knospe simulationData;
     simulationData.maxVelocityMps = 30;
     simulationData.newVehicleVelocityMps = 30;

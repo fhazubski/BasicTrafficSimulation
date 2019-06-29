@@ -94,6 +94,7 @@ struct tsp_vehicle : tsp_vehicle_position {
   bool newIsBreaking;
   tsp_int safetyGap = 0;
   tsp_id newLane;
+  bool isAutonomous = false;
 };
 
 struct tsp_simulation_result {
@@ -112,6 +113,7 @@ struct tsp_simulation_data_nasch {
   tsp_float laneLengthM;
   tsp_float carDensity;
   tsp_float simulationDurationS;
+  tsp_float autonomousCarsPercent;
 };
 
 struct tsp_simulation_data_knospe {

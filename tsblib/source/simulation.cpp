@@ -27,8 +27,7 @@ tsp_obstacle_line *Simulation::reserveObstacleMemory(tsp_int count) {
 }
 */
 bool Simulation::addVehicle(tsp_id startLane, tsp_int startPosition,
-                            tsp_int velocity) {
-  static tsp_id vehicleId = 1;
+                            tsp_int velocity, bool isAutonomous) {
   // std::cout << "TSP: lane " << startLane << " " << roadLanes.size()
   //          << std::endl;
   if (startLane >= roadLanes.size() ||
@@ -41,13 +40,13 @@ bool Simulation::addVehicle(tsp_id startLane, tsp_int startPosition,
   vehicle.velocity = velocity;
   vehicle.lane = startLane;
   vehicle.position = startPosition;
-  vehicle.id = vehicleId;
+  vehicle.id = static_cast<tsp_id>(vehicles.size() + 1);
+  vehicle.isAutonomous = isAutonomous;
   vehicles.push_back(vehicle);
   roadLanes[startLane].points[startPosition] = vehicles.back().id;
 
   // std::cout << "TSP: new vehicles size: " << vehicles.size() << std::endl;
 
-  vehicleId++;
   return true;
 }
 
@@ -69,24 +68,14 @@ bool Simulation::setTime(tsp_float newTime) {
   tsp_float timeToSet = time;
   for (; timeToSet + timeStep <= newTime; timeToSet += timeStep) {
     for (auto &vehicle : vehicles) {
-      tsp_int distance = distanceToTheNextVehicle(vehicle);
-      if (distance < vehicle.velocity + maximalAcceleration) {
-        vehicle.newVelocity = distance - 1;
-      } else if (distance == vehicle.velocity + maximalAcceleration + 1) {
-        vehicle.newVelocity = vehicle.velocity + maximalAcceleration;
-      } else {
-        vehicle.newVelocity = vehicle.velocity;
-      }
-
-      if (vehicle.newVelocity > roadLanes[vehicle.lane].maxVelocity) {
-        vehicle.newVelocity = roadLanes[vehicle.lane].maxVelocity;
-      }
+      vehicle.newVelocity = getNewVelocity(vehicle);
 
       auto randomValue = HelperMath::getRandom();
       // std::cout << "TSP: rand " << randomValue << " "
       //          << velocityDecreaseProbability << " " << vehicle->velocity
       //          << std::endl;
-      if (randomValue <= velocityDecreaseProbability) {
+      if ((!vehicle.isAutonomous) &&
+          (randomValue <= velocityDecreaseProbability)) {
         if (vehicle.newVelocity > randomDeceleration)
           vehicle.newVelocity -= randomDeceleration;
         else if (vehicle.newVelocity > 0)
@@ -125,7 +114,8 @@ tsp_simulation_result
 Simulation::simulate(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
                      tsp_float randomDecelerationMps,
                      tsp_float vehicleOccupiedSpaceM, tsp_float spaceLengthM,
-                     tsp_float carDensity, tsp_float simulationDurationS) {
+                     tsp_float carDensity, tsp_float simulationDurationS,
+                     tsp_float autonomousCarsPercent) {
   minimalDistance =
       static_cast<tsp_int>(std::ceil(vehicleOccupiedSpaceM / spaceLengthM));
   if (minimalDistance < 1) {
@@ -135,7 +125,10 @@ Simulation::simulate(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
       static_cast<tsp_float>(roadLanes[0].pointsCount / minimalDistance) *
       carDensity);
   std::cout << "TSP to spawn " << carsToSpawnCount << std::endl;
+  tsp_int autonomousCarsToSpawnCount = static_cast<tsp_int>(std::round(
+      static_cast<tsp_float>(carsToSpawnCount) * autonomousCarsPercent));
   tsp_int carsLeftToSpawn = carsToSpawnCount;
+  std::vector<tsp_int> positions(carsLeftToSpawn);
   while (carsLeftToSpawn > 0) {
     tsp_int realSpacesCount = roadLanes[0].pointsCount / minimalDistance;
     tsp_int newPosition =
@@ -145,9 +138,21 @@ Simulation::simulate(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
     newPosition *= minimalDistance;
     tsp_int newVelocity =
         static_cast<tsp_int>(newVehicleVelocityMps / spaceLengthM);
-    if (addVehicle(0, newPosition, newVelocity)) {
+    bool isAutonomous = (carsLeftToSpawn <= autonomousCarsToSpawnCount);
+    if (addVehicle(0, newPosition, newVelocity, isAutonomous)) {
       carsLeftToSpawn--;
+      positions[carsLeftToSpawn] = newPosition;
     }
+  }
+  std::sort(positions.begin(), positions.end());
+  positions.push_back(positions[0]);
+  for (size_t i = 0; i < positions.size() - 1; i++) {
+    tsp_vehicle &previousVehicle =
+        vehicles[roadLanes[0].points[positions[i]] - 1];
+    tsp_vehicle &nextVehicle =
+        vehicles[roadLanes[0].points[positions[i + 1]] - 1];
+    previousVehicle.nextVehicle = nextVehicle.id;
+    nextVehicle.previousVehicle = previousVehicle.id;
   }
 
   maximalAcceleration =
@@ -224,13 +229,43 @@ void Simulation::overrideAxleAngle(TSP::tsp_id vehicle, TSP::tsp_float angle) {
 */
 
 tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle &vehicle) {
-  for (tsp_int d = 1; d <= vehicle.velocity + maximalAcceleration; d++) {
-    if (roadLanes[vehicle.lane]
-            .points[(vehicle.position + d + minimalDistance - 1) %
-                    roadLanes[vehicle.lane].pointsCount] != 0)
-      return d;
+  tsp_int d = vehicles[vehicle.nextVehicle - 1].position - vehicle.position;
+  if (d < 0) {
+    d += roadLanes[vehicle.lane].pointsCount;
   }
-  return vehicle.velocity + maximalAcceleration + 1;
+  return d - minimalDistance + 1;
+}
+
+tsp_int Simulation::getNewVelocity(tsp_vehicle &vehicle) {
+  tsp_vehicle &nextVehicle = vehicles[vehicle.nextVehicle - 1];
+  tsp_int maxVelocity = std::min(vehicle.velocity + maximalAcceleration,
+                                 roadLanes[vehicle.lane].maxVelocity);
+  tsp_int distance = distanceToTheNextVehicle(vehicle);
+  if (distance - 1 < maxVelocity) {
+    return distance - 1;
+  }
+  if (!vehicle.isAutonomous || !nextVehicle.isAutonomous ||
+      (nextVehicle.velocity >= vehicle.velocity)) {
+    return maxVelocity;
+  }
+  return maxVelocity;
+
+  // If the next vehicle moving more slowly, adjust velocity to prevent sudden
+  // velocity changes
+  // return std::min(getRecommendedVelocity(vehicle), maxVelocity);
+}
+
+tsp_int Simulation::getRecommendedVelocity(tsp_vehicle &vehicle) {
+  tsp_vehicle &nextVehicle = vehicles[vehicle.nextVehicle - 1];
+  tsp_int distance = distanceToTheNextVehicle(vehicle);
+  tsp_int recommendedVelocity = nextVehicle.velocity;
+  tsp_int requiredDistance = recommendedVelocity + 1;
+  while (requiredDistance + recommendedVelocity + maximalAcceleration <=
+         distance) {
+    recommendedVelocity += maximalAcceleration;
+    requiredDistance += recommendedVelocity;
+  }
+  return recommendedVelocity;
 }
 
 } // namespace TSP

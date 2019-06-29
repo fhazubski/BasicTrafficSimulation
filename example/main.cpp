@@ -54,12 +54,25 @@ int main(int argc, char *argv[]) {
   QQmlApplicationEngine engine;
 
   if (SIMULATE_AND_SAVE_TO_FILE) {
-    simulateAndSave("NaSchP01.csv", DataNaSch());
+    /*simulateAndSave("NaSchP01.csv", DataNaSch());
     simulateAndSave("NaSchP05.csv", DataNaSchP05());
     simulateAndSave("NaSchLikeKnospe.csv", DataNaSchLikeKnospe());
     simulateAndSave("KnospeWithoutLaneChanging.csv",
-                    DataKnospeWithoutLaneChanging());
+                    DataKnospeWithoutLaneChanging());*/
+    /*simulateAndSave("NaSchP0.csv", DataNaSchP0());
     simulateAndSave("Knospe.csv", DataKnospe());
+    simulateAndSave("KnospeWithoutRandomizedBreaking.csv",
+                    DataKnospeWithoutRandomizedBreaking());*/
+    simulateAndSave("NaSchP03Auto0.csv", DataNaSchP03Auto0());
+    simulateAndSave("NaSchP03Auto025.csv", DataNaSchP03Auto025());
+    simulateAndSave("NaSchP03Auto05.csv", DataNaSchP03Auto05());
+    simulateAndSave("NaSchP03Auto075.csv", DataNaSchP03Auto075());
+    simulateAndSave("NaSchP03Auto1.csv", DataNaSchP03Auto1());
+    simulateAndSave("NaSchP03.csv", DataNaSchP03Auto0());
+    simulateAndSave("NaSchP0225.csv", DataNaSchP0225());
+    simulateAndSave("NaSchP015.csv", DataNaSchP015());
+    simulateAndSave("NaSchP0075.csv", DataNaSchP0075());
+    simulateAndSave("NaSchP0.csv", DataNaSchP0());
     return 0;
   }
   Simulation simulation;
