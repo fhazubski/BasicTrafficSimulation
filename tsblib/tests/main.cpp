@@ -1,9 +1,19 @@
 #include "include/tslib/api.h"
 
 int main() {
-#ifdef NDEBUG
-  for (int i = 0; i < 100; i++) {
+  int repeats = 20;
+#ifndef NDEBUG
+  repeats = 2;
 #endif
+
+  TSP::tsp_traffic_lights_data trafficLightsData;
+  trafficLightsData.trafficLightsPercent = 0.02;
+  trafficLightsData.minimalGreenLightDurationS = 60;
+  trafficLightsData.maximalGreenLightDurationS = 120;
+  trafficLightsData.minimalRedLightDurationS = 60;
+  trafficLightsData.maximalRedLightDurationS = 120;
+
+  for (int i = 0; i < repeats; i++) {
     TSP::tsp_simulation_data_nasch simulationDataNaSch;
     simulationDataNaSch.maxVelocityMps = 37.5;
     simulationDataNaSch.newVehicleVelocityMps = 37.5;
@@ -16,6 +26,7 @@ int main() {
     simulationDataNaSch.carDensity = 0.33;
     simulationDataNaSch.simulationDurationS = 200;
     simulationDataNaSch.autonomousCarsPercent = 0.0;
+    simulationDataNaSch.trafficLightsData = trafficLightsData;
 
     for (int i = 0; i < 20; i++) {
       tspSimulate(simulationDataNaSch);
@@ -60,8 +71,6 @@ int main() {
     tspSimulate(simulationData);
     simulationData.carDensity = 0.005;
     tspSimulate(simulationData);
-#ifdef NDEBUG
   }
-#endif
   return 0;
 }

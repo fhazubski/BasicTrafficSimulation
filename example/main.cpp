@@ -63,6 +63,7 @@ int main(int argc, char *argv[]) {
     simulateAndSave("Knospe.csv", DataKnospe());
     simulateAndSave("KnospeWithoutRandomizedBreaking.csv",
                     DataKnospeWithoutRandomizedBreaking());*/
+    /*
     simulateAndSave("NaSchP03Auto0.csv", DataNaSchP03Auto0());
     simulateAndSave("NaSchP03Auto025.csv", DataNaSchP03Auto025());
     simulateAndSave("NaSchP03Auto05.csv", DataNaSchP03Auto05());
@@ -72,7 +73,12 @@ int main(int argc, char *argv[]) {
     simulateAndSave("NaSchP0225.csv", DataNaSchP0225());
     simulateAndSave("NaSchP015.csv", DataNaSchP015());
     simulateAndSave("NaSchP0075.csv", DataNaSchP0075());
-    simulateAndSave("NaSchP0.csv", DataNaSchP0());
+    simulateAndSave("NaSchP0.csv", DataNaSchP0());*/
+    simulateAndSave("DataNaSch.csv", DataNaSch());
+    simulateAndSave("DataNaSchTrafficLightsP001.csv",
+                    DataNaSchTrafficLightsP001());
+    simulateAndSave("DataNaSchTrafficLightsP002.csv",
+                    DataNaSchTrafficLightsP002());
     return 0;
   }
   Simulation simulation;

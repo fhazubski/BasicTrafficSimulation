@@ -3,6 +3,7 @@ project(tslib VERSION 1.0.0 DESCRIPTION "Traffic Simulation Library")
 include(GNUInstallDirs)
 include(GenerateExportHeader)
 set(COMMON_SOURCES
+  ${PROJECT_BINARY_DIR}/tslib_export.h
   include/tslib/api.h
   include/tslib/types.h
   source/api.cpp
@@ -17,7 +18,7 @@ set(COMMON_SOURCES
   source/simulation.h
   source/simulation_knospe.cpp
   source/simulation_knospe.h
-  ${PROJECT_BINARY_DIR}/tslib_export.h)
+  source/types.cpp)
 add_library(tslib STATIC ${COMMON_SOURCES})
 add_executable(tests ${COMMON_SOURCES}
   tests/main.cpp)

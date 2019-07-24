@@ -1,5 +1,6 @@
 #include "source/simulation.h"
 #include "source/helpers/helper_math.h"
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <iterator>
@@ -32,7 +33,7 @@ bool Simulation::addVehicle(tsp_id startLane, tsp_int startPosition,
   //          << std::endl;
   if (startLane >= roadLanes.size() ||
       startPosition >= roadLanes[startLane].pointsCount ||
-      roadLanes[startLane].points[startPosition] != 0) {
+      roadLanes[startLane].points[startPosition].vehicle != 0) {
     return false;
   }
 
@@ -43,7 +44,7 @@ bool Simulation::addVehicle(tsp_id startLane, tsp_int startPosition,
   vehicle.id = static_cast<tsp_id>(vehicles.size() + 1);
   vehicle.isAutonomous = isAutonomous;
   vehicles.push_back(vehicle);
-  roadLanes[startLane].points[startPosition] = vehicles.back().id;
+  roadLanes[startLane].points[startPosition].vehicle = vehicles.back().id;
 
   // std::cout << "TSP: new vehicles size: " << vehicles.size() << std::endl;
 
@@ -51,12 +52,13 @@ bool Simulation::addVehicle(tsp_id startLane, tsp_int startPosition,
 }
 
 tsp_id Simulation::addLane(tsp_float spaceLengthM, tsp_float lengthM,
-                           tsp_int maxVelocity) {
+                           tsp_int maxVelocity,
+                           tsp_traffic_lights_data &trafficLightsData) {
   tsp_int spacesCount =
       static_cast<tsp_int>(std::round(lengthM / spaceLengthM));
   tsp_id newLaneId = static_cast<tsp_id>(roadLanes.size());
-  roadLanes.push_back(
-      tsp_road_lane(spacesCount, spaceLengthM, maxVelocity, newLaneId));
+  roadLanes.push_back(tsp_road_lane(spacesCount, spaceLengthM, maxVelocity,
+                                    newLaneId, &trafficLightsData));
   return newLaneId;
 }
 
@@ -98,14 +100,26 @@ void Simulation::updateVehicleStatusAndPosition() {
   for (auto &vehicle : vehicles) {
     vehicle.velocity = vehicle.newVelocity;
     if (vehicle.velocity > 0) {
-      roadLanes[vehicle.lane].points[vehicle.position] = 0;
+      roadLanes[vehicle.lane].points[vehicle.position].vehicle = 0;
       vehicle.position += vehicle.velocity;
       vehiclesCoveredDistanceM +=
           static_cast<tsp_float>(vehicle.velocity) * roadLanes[0].spaceLengthM;
       if (vehicle.position >= roadLanes[0].pointsCount) {
         vehicle.position -= roadLanes[0].pointsCount;
       }
-      roadLanes[vehicle.lane].points[vehicle.position] = vehicle.id;
+      roadLanes[vehicle.lane].points[vehicle.position].vehicle = vehicle.id;
+    }
+  }
+
+  for (auto &roadLane : roadLanes) {
+    for (auto point : roadLane.pointsWithTrafficLights) {
+      point->timeToNextState -= second;
+      if (point->timeToNextState <= 0) {
+        point->isTrafficLightRed = !point->isTrafficLightRed;
+        point->timeToNextState =
+            (point->isTrafficLightRed ? point->redLightDurationS
+                                      : point->greenLightDurationS);
+      }
     }
   }
 }
@@ -163,9 +177,9 @@ Simulation::simulate(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
   positions.push_back(positions[0]);
   for (size_t i = 0; i < positions.size() - 1; i++) {
     tsp_vehicle &previousVehicle =
-        vehicles[roadLanes[0].points[positions[i]] - 1];
+        vehicles[roadLanes[0].points[positions[i]].vehicle - 1];
     tsp_vehicle &nextVehicle =
-        vehicles[roadLanes[0].points[positions[i + 1]] - 1];
+        vehicles[roadLanes[0].points[positions[i + 1]].vehicle - 1];
     previousVehicle.nextVehicle = nextVehicle.id;
     nextVehicle.previousVehicle = previousVehicle.id;
   }
@@ -251,12 +265,35 @@ tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle &vehicle) {
   return d - minimalDistance + 1;
 }
 
+tsp_int Simulation::distanceToTheNearestRedTrafficLight(tsp_vehicle &vehicle) {
+  tsp_int d = roadLanes[vehicle.lane].maxVelocity + minimalDistance;
+  if (roadLanes[vehicle.lane].pointsWithTrafficLights.empty()) {
+    return d;
+  }
+  for (auto trafficLight : roadLanes[vehicle.lane].pointsWithTrafficLights) {
+    if (trafficLight->isTrafficLightRed) {
+      tsp_int newDistance = trafficLight->position - vehicle.position;
+      if (newDistance < 0) {
+        newDistance += roadLanes[vehicle.lane].pointsCount;
+      }
+      if (newDistance < d) {
+        d = newDistance;
+      }
+    }
+  }
+  return d - minimalDistance + 1;
+}
+
 tsp_int Simulation::getNewVelocity(tsp_vehicle &vehicle) {
   tsp_int maxVelocity = std::min(vehicle.velocity + maximalAcceleration,
                                  roadLanes[vehicle.lane].maxVelocity);
   tsp_int distance = distanceToTheNextVehicle(vehicle);
 
-  return std::min(maxVelocity, distance - 1);
+  tsp_int newVelocity = std::min(maxVelocity, distance - 1);
+
+  distance = distanceToTheNearestRedTrafficLight(vehicle);
+
+  return std::min(newVelocity, distance - 1);
 
   // If the next vehicle moving more slowly, adjust velocity to prevent sudden
   // velocity changes

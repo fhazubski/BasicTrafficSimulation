@@ -8,9 +8,10 @@
 
 TSP::tsp_simulation_result tspSimulate(TSP::tsp_simulation_data_nasch data) {
   Simulation simulation;
-  simulation.addLane(data.spaceLengthM, data.laneLengthM,
-                     static_cast<tsp_int>(
-                         std::round(data.maxVelocityMps / data.spaceLengthM)));
+  simulation.addLane(
+      data.spaceLengthM, data.laneLengthM,
+      static_cast<tsp_int>(std::round(data.maxVelocityMps / data.spaceLengthM)),
+      data.trafficLightsData);
   simulation.setP(data.velocityDecreaseProbability);
   return simulation.simulate(
       data.newVehicleVelocityMps, data.accelerationMps,

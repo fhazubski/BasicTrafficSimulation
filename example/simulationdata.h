@@ -3,6 +3,24 @@
 
 #include "tslib/types.h"
 
+struct NoTrafficLights : TSP::tsp_traffic_lights_data {
+  NoTrafficLights() { trafficLightsPercent = 0; }
+};
+
+struct TrafficLights : TSP::tsp_traffic_lights_data {
+  TrafficLights() {
+    trafficLightsPercent = 0.01;
+    minimalRedLightDurationS = 60;
+    maximalRedLightDurationS = 60;
+    minimalGreenLightDurationS = 60;
+    maximalGreenLightDurationS = 60;
+  }
+};
+
+struct MoreTrafficLights : TrafficLights {
+  MoreTrafficLights() { trafficLightsPercent = 0.02; }
+};
+
 struct DataNaSch : TSP::tsp_simulation_data_nasch {
   DataNaSch() {
     maxVelocityMps = 37.5;
@@ -14,6 +32,7 @@ struct DataNaSch : TSP::tsp_simulation_data_nasch {
     spaceLengthM = 7.5;
     laneLengthM = 1000;
     autonomousCarsPercent = 0;
+    trafficLightsData = NoTrafficLights();
   }
 };
 
@@ -55,6 +74,14 @@ struct DataNaSchP05 : DataNaSch {
 
 struct DataNaSchP0 : DataNaSch {
   DataNaSchP0() { velocityDecreaseProbability = 0; }
+};
+
+struct DataNaSchTrafficLightsP001 : DataNaSch {
+  DataNaSchTrafficLightsP001() { trafficLightsData = TrafficLights(); }
+};
+
+struct DataNaSchTrafficLightsP002 : DataNaSch {
+  DataNaSchTrafficLightsP002() { trafficLightsData = MoreTrafficLights(); }
 };
 
 struct DataNaSchLikeKnospe : TSP::tsp_simulation_data_nasch {

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <algorithm>
 #include <vector>
 
 namespace TSP {
@@ -30,16 +29,31 @@ struct tsp_obstacle_line {
   tsp_line line;
 };
 
+struct tsp_traffic_lights_data {
+  tsp_float trafficLightsPercent;
+  tsp_float minimalGreenLightDurationS;
+  tsp_float maximalGreenLightDurationS;
+  tsp_float minimalRedLightDurationS;
+  tsp_float maximalRedLightDurationS;
+};
+
+struct tsp_lane_point {
+  tsp_int vehicle;
+  tsp_int position;
+  bool hasTrafficLight;
+  bool isTrafficLightRed;
+  tsp_int greenLightDurationS;
+  tsp_int redLightDurationS;
+  tsp_int timeToNextState;
+};
+
 struct tsp_road_lane {
   tsp_road_lane(const tsp_int pointsCount, const tsp_float spaceLengthM,
-                const tsp_int maxVelocity, const tsp_id id)
-      : pointsCount(pointsCount), spaceLengthM(spaceLengthM),
-        maxVelocity(maxVelocity), id(id) {
-    points.resize(pointsCount);
-    std::fill(points.begin(), points.end(), 0);
-  }
+                const tsp_int maxVelocity, const tsp_id id,
+                const tsp_traffic_lights_data *const trafficLightsData);
   const tsp_int pointsCount;
-  std::vector<tsp_int> points;
+  std::vector<tsp_lane_point> points;
+  std::vector<tsp_lane_point *> pointsWithTrafficLights;
   const tsp_float spaceLengthM;
   const tsp_int maxVelocity;
   const tsp_id id;
@@ -114,6 +128,7 @@ struct tsp_simulation_data_nasch {
   tsp_float carDensity;
   tsp_float simulationDurationS;
   tsp_float autonomousCarsPercent;
+  tsp_traffic_lights_data trafficLightsData;
 };
 
 struct tsp_simulation_data_knospe {

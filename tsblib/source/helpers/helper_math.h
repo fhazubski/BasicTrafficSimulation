@@ -26,10 +26,14 @@ public:
                              const tsp_float timeChange);
                                                          */
 
+  // Returns random number x, where 0 < x <= 1
   static tsp_float getRandom();
-  static tsp_int getRandomInt(tsp_int max);
+  // Returns random integer x, where min <= x <= max
+  static tsp_int getRandomInt(tsp_int min, tsp_int max);
 
   static tsp_float lineToRotation(const tsp_position *const line);
+
+  static tsp_int userTimeToSimulationTimeS(tsp_float userTime);
 };
 
 } // namespace TSP

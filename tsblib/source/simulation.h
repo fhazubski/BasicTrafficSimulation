@@ -8,8 +8,8 @@ class Simulation {
 public:
   bool addVehicle(tsp_id startLane, tsp_int startPosition, tsp_int velocity,
                   bool isAutonomous);
-  tsp_id addLane(tsp_float spaceLengthM, tsp_float lengthM,
-                 tsp_int maxVelocity);
+  tsp_id addLane(tsp_float spaceLengthM, tsp_float lengthM, tsp_int maxVelocity,
+                 tsp_traffic_lights_data &trafficLightsData);
   bool setTime(tsp_float newTime);
   void updateVehicleStatusAndPosition();
   void v2vCommunication();
@@ -23,6 +23,7 @@ public:
 
 private:
   tsp_int distanceToTheNextVehicle(tsp_vehicle &vehicle);
+  tsp_int distanceToTheNearestRedTrafficLight(tsp_vehicle &vehicle);
   tsp_int getNewVelocity(tsp_vehicle &vehicle);
   tsp_int getRecommendedVelocity(tsp_vehicle &vehicle);
 
@@ -32,9 +33,9 @@ private:
   tsp_int maximalAcceleration;
   tsp_int randomDeceleration;
   tsp_int minimalDistance;
+  const tsp_int v2vCommunicationTimeInterval = 10 * milisecond;
   const tsp_int timeStep = v2vCommunicationTimeInterval;
   const tsp_int vehiclesStateAndPositionUpdateTimeInterval = second;
-  const tsp_int v2vCommunicationTimeInterval = 10 * milisecond;
 
   std::vector<tsp_road_lane> roadLanes;
   std::vector<tsp_vehicle> vehicles;
