@@ -11,6 +11,8 @@ public:
   tsp_id addLane(tsp_float spaceLengthM, tsp_float lengthM,
                  tsp_int maxVelocity);
   bool setTime(tsp_float newTime);
+  void updateVehicleStatusAndPosition();
+  void v2vCommunication();
   bool setP(tsp_float p);
   bool tspGetPositions(tsp_vehicle_position *vehiclePositions);
   tsp_simulation_result
@@ -24,13 +26,15 @@ private:
   tsp_int getNewVelocity(tsp_vehicle &vehicle);
   tsp_int getRecommendedVelocity(tsp_vehicle &vehicle);
 
-  tsp_float time = 0;
+  tsp_int time = 0;
   tsp_float velocityDecreaseProbability = 0;
   tsp_float vehiclesCoveredDistanceM = 0;
   tsp_int maximalAcceleration;
   tsp_int randomDeceleration;
   tsp_int minimalDistance;
-  const tsp_float timeStep = second;
+  const tsp_int timeStep = v2vCommunicationTimeInterval;
+  const tsp_int vehiclesStateAndPositionUpdateTimeInterval = second;
+  const tsp_int v2vCommunicationTimeInterval = 10 * milisecond;
 
   std::vector<tsp_road_lane> roadLanes;
   std::vector<tsp_vehicle> vehicles;

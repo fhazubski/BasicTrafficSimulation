@@ -65,49 +65,64 @@ bool Simulation::setTime(tsp_float newTime) {
     return false;
   }
 
-  tsp_float timeToSet = time;
+  tsp_int timeToSet = time;
   for (; timeToSet + timeStep <= newTime; timeToSet += timeStep) {
-    for (auto &vehicle : vehicles) {
-      vehicle.newVelocity = getNewVelocity(vehicle);
-
-      auto randomValue = HelperMath::getRandom();
-      // std::cout << "TSP: rand " << randomValue << " "
-      //          << velocityDecreaseProbability << " " << vehicle->velocity
-      //          << std::endl;
-      if ((!vehicle.isAutonomous) &&
-          (randomValue <= velocityDecreaseProbability)) {
-        if (vehicle.newVelocity > randomDeceleration)
-          vehicle.newVelocity -= randomDeceleration;
-        else if (vehicle.newVelocity > 0)
-          vehicle.newVelocity = 0;
-      }
+    if (timeToSet % v2vCommunicationTimeInterval == 0) {
+      v2vCommunication();
     }
-
-    for (auto &vehicle : vehicles) {
-      vehicle.velocity = vehicle.newVelocity;
-      if (vehicle.velocity > 0) {
-        roadLanes[vehicle.lane].points[vehicle.position] = 0;
-        vehicle.position += vehicle.velocity;
-        vehiclesCoveredDistanceM += static_cast<tsp_float>(vehicle.velocity) *
-                                    roadLanes[0].spaceLengthM;
-        if (vehicle.position >= roadLanes[0].pointsCount) {
-          vehicle.position -= roadLanes[0].pointsCount;
-        }
-        roadLanes[vehicle.lane].points[vehicle.position] = vehicle.id;
-      }
+    if (timeToSet % vehiclesStateAndPositionUpdateTimeInterval == 0) {
+      updateVehicleStatusAndPosition();
     }
-    // std::cout << "TSP velocities: ";
-    // for (auto v : vCounts) {
-    //  std::cout << v << " ";
-    //}
-    // std::cout << std::endl;
-    // std::cout << "TSP: vehicles " << vehicles.size() << std::endl;
-    // std::cout << "TSP: time " << statisticsStartTime +
-    // gatheringStatisticsTime
-    //          << " " << time + timeTick << std::endl;
   }
   time = timeToSet;
   return true;
+}
+
+void Simulation::updateVehicleStatusAndPosition() {
+  for (auto &vehicle : vehicles) {
+    vehicle.newVelocity = getNewVelocity(vehicle);
+
+    auto randomValue = HelperMath::getRandom();
+    // std::cout << "TSP: rand " << randomValue << " "
+    //          << velocityDecreaseProbability << " " << vehicle->velocity
+    //          << std::endl;
+    if ((!vehicle.isAutonomous) &&
+        (randomValue <= velocityDecreaseProbability)) {
+      if (vehicle.newVelocity > randomDeceleration)
+        vehicle.newVelocity -= randomDeceleration;
+      else if (vehicle.newVelocity > 0)
+        vehicle.newVelocity = 0;
+    }
+  }
+
+  for (auto &vehicle : vehicles) {
+    vehicle.velocity = vehicle.newVelocity;
+    if (vehicle.velocity > 0) {
+      roadLanes[vehicle.lane].points[vehicle.position] = 0;
+      vehicle.position += vehicle.velocity;
+      vehiclesCoveredDistanceM +=
+          static_cast<tsp_float>(vehicle.velocity) * roadLanes[0].spaceLengthM;
+      if (vehicle.position >= roadLanes[0].pointsCount) {
+        vehicle.position -= roadLanes[0].pointsCount;
+      }
+      roadLanes[vehicle.lane].points[vehicle.position] = vehicle.id;
+    }
+  }
+}
+void Simulation::v2vCommunication() {
+  for (auto &vehicle : vehicles) {
+    if (!vehicle.isAutonomous) {
+      continue;
+    }
+    auto &previousVehicle = vehicles[vehicle.previousVehicle - 1];
+    if (!previousVehicle.isAutonomous) {
+      continue;
+    }
+    if (previousVehicle.velocity > vehicle.velocity &&
+        distanceToTheNextVehicle(previousVehicle) <= maximalAcceleration) {
+      previousVehicle.velocity = vehicle.velocity;
+    }
+  }
 }
 
 tsp_simulation_result
@@ -237,18 +252,11 @@ tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle &vehicle) {
 }
 
 tsp_int Simulation::getNewVelocity(tsp_vehicle &vehicle) {
-  tsp_vehicle &nextVehicle = vehicles[vehicle.nextVehicle - 1];
   tsp_int maxVelocity = std::min(vehicle.velocity + maximalAcceleration,
                                  roadLanes[vehicle.lane].maxVelocity);
   tsp_int distance = distanceToTheNextVehicle(vehicle);
-  if (distance - 1 < maxVelocity) {
-    return distance - 1;
-  }
-  if (!vehicle.isAutonomous || !nextVehicle.isAutonomous ||
-      (nextVehicle.velocity >= vehicle.velocity)) {
-    return maxVelocity;
-  }
-  return maxVelocity;
+
+  return std::min(maxVelocity, distance - 1);
 
   // If the next vehicle moving more slowly, adjust velocity to prevent sudden
   // velocity changes
@@ -256,6 +264,7 @@ tsp_int Simulation::getNewVelocity(tsp_vehicle &vehicle) {
 }
 
 tsp_int Simulation::getRecommendedVelocity(tsp_vehicle &vehicle) {
+  // TODO fix this function to do something useful
   tsp_vehicle &nextVehicle = vehicles[vehicle.nextVehicle - 1];
   tsp_int distance = distanceToTheNextVehicle(vehicle);
   tsp_int recommendedVelocity = nextVehicle.velocity;
