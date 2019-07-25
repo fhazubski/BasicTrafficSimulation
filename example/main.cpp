@@ -79,6 +79,16 @@ int main(int argc, char *argv[]) {
                     DataNaSchTrafficLightsP001());
     simulateAndSave("DataNaSchTrafficLightsP002.csv",
                     DataNaSchTrafficLightsP002());
+
+    simulateAndSave("DataNaSchTrafficLightsOneFullSpeed.csv",
+                    DataNaSchTrafficLightsOneFullSpeed());
+    simulateAndSave("DataNaSchTrafficLightsThreeFullSpeed.csv",
+                    DataNaSchTrafficLightsThreeFullSpeed());
+    simulateAndSave("DataNaSchTrafficLightsOne08Speed.csv",
+                    DataNaSchTrafficLightsOne08Speed());
+    simulateAndSave("DataNaSchTrafficLightsThree08Speed.csv",
+                    DataNaSchTrafficLightsThree08Speed());
+
     return 0;
   }
   Simulation simulation;

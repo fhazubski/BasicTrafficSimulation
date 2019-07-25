@@ -34,6 +34,7 @@ public:
   static tsp_float lineToRotation(const tsp_position *const line);
 
   static tsp_int userTimeToSimulationTimeS(tsp_float userTime);
+  static tsp_int userTimeToSimulationTimeFullS(tsp_float userTime);
 };
 
 } // namespace TSP

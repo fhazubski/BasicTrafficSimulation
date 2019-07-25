@@ -30,11 +30,20 @@ struct tsp_obstacle_line {
 };
 
 struct tsp_traffic_lights_data {
+  bool useRandomizedInputs;
+  // Luck based inputs, used if useRandomizedInputs = true
   tsp_float trafficLightsPercent;
   tsp_float minimalGreenLightDurationS;
   tsp_float maximalGreenLightDurationS;
   tsp_float minimalRedLightDurationS;
   tsp_float maximalRedLightDurationS;
+
+  // Not luck based inputs, used if useRandomizedInputs = false
+  tsp_int trafficLightsCount;
+  tsp_float spacingPercent;
+  tsp_float optimalSpeedPercentOfMaxSpeed;
+  tsp_float greenLightDurationS;
+  tsp_float redLightDurationS;
 };
 
 struct tsp_lane_point {

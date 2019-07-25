@@ -7,11 +7,20 @@ int main() {
 #endif
 
   TSP::tsp_traffic_lights_data trafficLightsData;
+  trafficLightsData.useRandomizedInputs = true;
   trafficLightsData.trafficLightsPercent = 0.02;
   trafficLightsData.minimalGreenLightDurationS = 60;
   trafficLightsData.maximalGreenLightDurationS = 120;
   trafficLightsData.minimalRedLightDurationS = 60;
   trafficLightsData.maximalRedLightDurationS = 120;
+
+  TSP::tsp_traffic_lights_data trafficLightsDataNotRandomized;
+  trafficLightsDataNotRandomized.useRandomizedInputs = false;
+  trafficLightsDataNotRandomized.trafficLightsCount = 3;
+  trafficLightsDataNotRandomized.spacingPercent = 0.5;
+  trafficLightsDataNotRandomized.optimalSpeedPercentOfMaxSpeed = 0.8;
+  trafficLightsDataNotRandomized.greenLightDurationS = 60;
+  trafficLightsDataNotRandomized.redLightDurationS = 30;
 
   for (int i = 0; i < repeats; i++) {
     TSP::tsp_simulation_data_nasch simulationDataNaSch;
@@ -38,6 +47,7 @@ int main() {
     }
 
     simulationDataNaSch.autonomousCarsPercent = 1.0;
+    simulationDataNaSch.trafficLightsData = trafficLightsDataNotRandomized;
     for (int i = 0; i < 20; i++) {
       tspSimulate(simulationDataNaSch);
     }

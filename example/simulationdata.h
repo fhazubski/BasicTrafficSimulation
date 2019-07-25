@@ -4,11 +4,16 @@
 #include "tslib/types.h"
 
 struct NoTrafficLights : TSP::tsp_traffic_lights_data {
-  NoTrafficLights() { trafficLightsPercent = 0; }
+  NoTrafficLights() {
+    useRandomizedInputs = false;
+    trafficLightsPercent = 0;
+    trafficLightsCount = 0;
+  }
 };
 
-struct TrafficLights : TSP::tsp_traffic_lights_data {
-  TrafficLights() {
+struct TrafficLightsRandomized : TSP::tsp_traffic_lights_data {
+  TrafficLightsRandomized() {
+    useRandomizedInputs = true;
     trafficLightsPercent = 0.01;
     minimalRedLightDurationS = 60;
     maximalRedLightDurationS = 60;
@@ -17,8 +22,37 @@ struct TrafficLights : TSP::tsp_traffic_lights_data {
   }
 };
 
-struct MoreTrafficLights : TrafficLights {
-  MoreTrafficLights() { trafficLightsPercent = 0.02; }
+struct MoreTrafficLightsRandomized : TrafficLightsRandomized {
+  MoreTrafficLightsRandomized() { trafficLightsPercent = 0.02; }
+};
+
+struct TrafficLightsSingleFullSpeedNotRandomized
+    : TSP::tsp_traffic_lights_data {
+  TrafficLightsSingleFullSpeedNotRandomized() {
+    useRandomizedInputs = false;
+    trafficLightsCount = 1;
+    spacingPercent = 0.5;
+    optimalSpeedPercentOfMaxSpeed = 1.0;
+    greenLightDurationS = 60;
+    redLightDurationS = 30;
+  }
+};
+
+struct TrafficLightsThreeFullSpeedNotRandomized
+    : TrafficLightsSingleFullSpeedNotRandomized {
+  TrafficLightsThreeFullSpeedNotRandomized() { trafficLightsCount = 3; }
+};
+
+struct TrafficLightsSingle08SpeedNotRandomized
+    : TrafficLightsSingleFullSpeedNotRandomized {
+  TrafficLightsSingle08SpeedNotRandomized() {
+    optimalSpeedPercentOfMaxSpeed = 0.8;
+  }
+};
+
+struct TrafficLightsThree08SpeedNotRandomized
+    : TrafficLightsSingle08SpeedNotRandomized {
+  TrafficLightsThree08SpeedNotRandomized() { trafficLightsCount = 3; }
 };
 
 struct DataNaSch : TSP::tsp_simulation_data_nasch {
@@ -77,11 +111,39 @@ struct DataNaSchP0 : DataNaSch {
 };
 
 struct DataNaSchTrafficLightsP001 : DataNaSch {
-  DataNaSchTrafficLightsP001() { trafficLightsData = TrafficLights(); }
+  DataNaSchTrafficLightsP001() {
+    trafficLightsData = TrafficLightsRandomized();
+  }
 };
 
 struct DataNaSchTrafficLightsP002 : DataNaSch {
-  DataNaSchTrafficLightsP002() { trafficLightsData = MoreTrafficLights(); }
+  DataNaSchTrafficLightsP002() {
+    trafficLightsData = MoreTrafficLightsRandomized();
+  }
+};
+
+struct DataNaSchTrafficLightsOneFullSpeed : DataNaSch {
+  DataNaSchTrafficLightsOneFullSpeed() {
+    trafficLightsData = TrafficLightsSingleFullSpeedNotRandomized();
+  }
+};
+
+struct DataNaSchTrafficLightsThreeFullSpeed : DataNaSch {
+  DataNaSchTrafficLightsThreeFullSpeed() {
+    trafficLightsData = TrafficLightsThreeFullSpeedNotRandomized();
+  }
+};
+
+struct DataNaSchTrafficLightsOne08Speed : DataNaSch {
+  DataNaSchTrafficLightsOne08Speed() {
+    trafficLightsData = TrafficLightsSingle08SpeedNotRandomized();
+  }
+};
+
+struct DataNaSchTrafficLightsThree08Speed : DataNaSch {
+  DataNaSchTrafficLightsThree08Speed() {
+    trafficLightsData = TrafficLightsThree08SpeedNotRandomized();
+  }
 };
 
 struct DataNaSchLikeKnospe : TSP::tsp_simulation_data_nasch {
