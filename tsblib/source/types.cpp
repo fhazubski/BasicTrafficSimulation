@@ -3,6 +3,7 @@
 #include "include/tslib/types.h"
 #include "source/helpers/helper_math.h"
 #include <algorithm>
+#include <iostream>
 
 namespace TSP {
 
@@ -68,17 +69,20 @@ void initializeNotRandomizedTrafficLights(
       lane.points.size() / trafficLightsData.trafficLightsCount;
   positionOffset = static_cast<tsp_int>(static_cast<tsp_float>(positionOffset) *
                                         trafficLightsData.spacingPercent);
-  if (positionOffset == 0) {
+  if (positionOffset <= 0) {
     positionOffset = 1;
   }
-  tsp_float expectedOptimalVelocity =
-      static_cast<tsp_float>(maxVelocity) *
-      trafficLightsData.optimalSpeedPercentOfMaxSpeed;
-  tsp_float optimalVelocity = std::max(
-      static_cast<tsp_float>(1),
-      std::min(static_cast<tsp_float>(maxVelocity), expectedOptimalVelocity));
-  tsp_int timeOffset = static_cast<tsp_int>(
-      std::round(static_cast<tsp_float>(positionOffset) / optimalVelocity));
+  tsp_float optimalVelocity = static_cast<tsp_float>(maxVelocity) *
+                              trafficLightsData.optimalSpeedPercentOfMaxSpeed;
+  optimalVelocity =
+      std::max(static_cast<tsp_float>(1),
+               std::min(static_cast<tsp_float>(maxVelocity), optimalVelocity));
+  tsp_int timeOffset = static_cast<tsp_int>(std::round(
+      static_cast<tsp_float>(positionOffset * second) / optimalVelocity));
+  std::cout << "TSP: lights offset: " << positionOffset
+            << ", time offset: " << timeOffset << ", max V: " << maxVelocity
+            << ", optimal V: " << optimalVelocity << ", optimal V percent: "
+            << trafficLightsData.optimalSpeedPercentOfMaxSpeed << std::endl;
 
   tsp_int currentPosition = HelperMath::getRandomInt(0, lane.points.size() - 1);
   tsp_int currentTime = 0;
@@ -88,6 +92,9 @@ void initializeNotRandomizedTrafficLights(
       trafficLightsData.redLightDurationS);
   tsp_int trafficLightsToCreate = trafficLightsData.trafficLightsCount;
 
+  std::cout << "TSP: green light time: " << greenLightDuration
+            << ", red light: " << redLightDuration << std::endl;
+
   lane.pointsWithTrafficLights.resize(trafficLightsToCreate);
   while (trafficLightsToCreate--) {
     auto &point = lane.points[currentPosition % lane.points.size()];
@@ -95,14 +102,14 @@ void initializeNotRandomizedTrafficLights(
     point.hasTrafficLight = true;
     point.greenLightDurationS = greenLightDuration;
     point.redLightDurationS = redLightDuration;
-    point.timeToNextState =
+    tsp_int timeSinceGreenLightStart =
         currentTime % (greenLightDuration + redLightDuration);
-    point.isTrafficLightRed = (point.timeToNextState >= greenLightDuration);
+    point.isTrafficLightRed = (timeSinceGreenLightStart >= greenLightDuration);
     if (point.isTrafficLightRed) {
       point.timeToNextState =
-          redLightDuration - (point.timeToNextState - greenLightDuration);
+          redLightDuration - (timeSinceGreenLightStart - greenLightDuration);
     } else {
-      point.timeToNextState = greenLightDuration - point.timeToNextState;
+      point.timeToNextState = greenLightDuration - timeSinceGreenLightStart;
     }
     lane.pointsWithTrafficLights[trafficLightsToCreate] = &point;
 
@@ -123,6 +130,17 @@ tsp_road_lane::tsp_road_lane(
     points[i].position = i;
     points[i].hasTrafficLight = false;
   }
+
+  std::cout << "TSP: traffic lights data: " << trafficLightsData
+            << ", lights randomized: "
+            << (trafficLightsData != nullptr
+                    ? trafficLightsData->useRandomizedInputs
+                    : -1)
+            << ", lights count: "
+            << (trafficLightsData != nullptr
+                    ? trafficLightsData->trafficLightsCount
+                    : -1)
+            << std::endl;
 
   if (trafficLightsData != nullptr) {
     if (trafficLightsData->useRandomizedInputs) {

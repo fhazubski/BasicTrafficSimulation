@@ -116,7 +116,7 @@ void Simulation::updateVehicleStatusAndPosition() {
       point->timeToNextState -= second;
       if (point->timeToNextState <= 0) {
         point->isTrafficLightRed = !point->isTrafficLightRed;
-        point->timeToNextState =
+        point->timeToNextState +=
             (point->isTrafficLightRed ? point->redLightDurationS
                                       : point->greenLightDurationS);
       }
@@ -153,7 +153,7 @@ Simulation::simulate(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
   tsp_int carsToSpawnCount = static_cast<tsp_int>(
       static_cast<tsp_float>(roadLanes[0].pointsCount / minimalDistance) *
       carDensity);
-  std::cout << "TSP to spawn " << carsToSpawnCount << std::endl;
+  // std::cout << "TSP to spawn " << carsToSpawnCount << std::endl;
   tsp_int autonomousCarsToSpawnCount = static_cast<tsp_int>(std::round(
       static_cast<tsp_float>(carsToSpawnCount) * autonomousCarsPercent));
   tsp_int carsLeftToSpawn = carsToSpawnCount;
@@ -188,9 +188,9 @@ Simulation::simulate(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
       static_cast<tsp_int>(std::round(accelerationMps / spaceLengthM));
   randomDeceleration =
       static_cast<tsp_int>(std::round(randomDecelerationMps / spaceLengthM));
-  std::cout << "TSP min distance " << minimalDistance << " max acc "
-            << maximalAcceleration << " rand dec " << randomDeceleration
-            << " max vel " << roadLanes[0].maxVelocity << std::endl;
+  // std::cout << "TSP min distance " << minimalDistance << " max acc "
+  //          << maximalAcceleration << " rand dec " << randomDeceleration
+  //          << " max vel " << roadLanes[0].maxVelocity << std::endl;
 
   setTime(simulationDurationS * second);
   tsp_simulation_result results;
@@ -205,13 +205,13 @@ Simulation::simulate(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
   results.vehiclesDensity =
       static_cast<tsp_float>(carsToSpawnCount * minimalDistance) /
       static_cast<tsp_float>(roadLanes[0].pointsCount);
-  std::cout << "TSP: results: " << results.vehiclesPerTime << " "
-            << results.vehiclesDensity << std::endl;
+  // std::cout << "TSP: results: " << results.vehiclesPerTime << " "
+  //          << results.vehiclesDensity << std::endl;
   return results;
 }
 
 bool Simulation::tspGetPositions(TSP::tsp_vehicle_position *vehiclePositions) {
-  std::cout << "TSP: vehicles size " << vehicles.size() << std::endl;
+  // std::cout << "TSP: vehicles size " << vehicles.size() << std::endl;
   for (int i = 0; i < vehicles.size(); i++) {
     vehiclePositions[i].lane = vehicles[i].lane;
     vehiclePositions[i].position = vehicles[i].position;

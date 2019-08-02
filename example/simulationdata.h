@@ -38,21 +38,11 @@ struct TrafficLightsSingleFullSpeedNotRandomized
   }
 };
 
-struct TrafficLightsThreeFullSpeedNotRandomized
-    : TrafficLightsSingleFullSpeedNotRandomized {
-  TrafficLightsThreeFullSpeedNotRandomized() { trafficLightsCount = 3; }
-};
-
 struct TrafficLightsSingle08SpeedNotRandomized
     : TrafficLightsSingleFullSpeedNotRandomized {
   TrafficLightsSingle08SpeedNotRandomized() {
     optimalSpeedPercentOfMaxSpeed = 0.8;
   }
-};
-
-struct TrafficLightsThree08SpeedNotRandomized
-    : TrafficLightsSingle08SpeedNotRandomized {
-  TrafficLightsThree08SpeedNotRandomized() { trafficLightsCount = 3; }
 };
 
 struct DataNaSch : TSP::tsp_simulation_data_nasch {
@@ -130,7 +120,15 @@ struct DataNaSchTrafficLightsOneFullSpeed : DataNaSch {
 
 struct DataNaSchTrafficLightsThreeFullSpeed : DataNaSch {
   DataNaSchTrafficLightsThreeFullSpeed() {
-    trafficLightsData = TrafficLightsThreeFullSpeedNotRandomized();
+    trafficLightsData = TrafficLightsSingleFullSpeedNotRandomized();
+    trafficLightsData.trafficLightsCount = 3;
+  }
+};
+
+struct DataNaSchTrafficLightsTwentyFullSpeed : DataNaSch {
+  DataNaSchTrafficLightsTwentyFullSpeed() {
+    trafficLightsData = TrafficLightsSingleFullSpeedNotRandomized();
+    trafficLightsData.trafficLightsCount = 20;
   }
 };
 
@@ -142,7 +140,15 @@ struct DataNaSchTrafficLightsOne08Speed : DataNaSch {
 
 struct DataNaSchTrafficLightsThree08Speed : DataNaSch {
   DataNaSchTrafficLightsThree08Speed() {
-    trafficLightsData = TrafficLightsThree08SpeedNotRandomized();
+    trafficLightsData = TrafficLightsSingle08SpeedNotRandomized();
+    trafficLightsData.trafficLightsCount = 3;
+  }
+};
+
+struct DataNaSchTrafficLightsTwenty08Speed : DataNaSch {
+  DataNaSchTrafficLightsTwenty08Speed() {
+    trafficLightsData = TrafficLightsSingle08SpeedNotRandomized();
+    trafficLightsData.trafficLightsCount = 20;
   }
 };
 

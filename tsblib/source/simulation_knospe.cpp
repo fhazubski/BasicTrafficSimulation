@@ -186,7 +186,7 @@ tsp_simulation_result SimulationKnospe::simulate(
     tsp_int carsLeftToSpawn =
         static_cast<tsp_int>(realSpacesCount * carDensity);
     carsToSpawnCount += carsLeftToSpawn;
-    std::cout << "TSP to spawn " << carsLeftToSpawn << std::endl;
+    // std::cout << "TSP to spawn " << carsLeftToSpawn << std::endl;
     tsp_int newVelocity =
         static_cast<tsp_int>(newVehicleVelocityMps / spaceLengthM);
     std::vector<tsp_int> positions(carsLeftToSpawn);
@@ -216,9 +216,9 @@ tsp_simulation_result SimulationKnospe::simulate(
       static_cast<tsp_int>(std::round(accelerationMps / spaceLengthM));
   randomDeceleration =
       static_cast<tsp_int>(std::round(randomDecelerationMps / spaceLengthM));
-  std::cout << "TSP min distance " << minimalDistance << " max acc "
-            << maximalAcceleration << " rand dec " << randomDeceleration
-            << " max vel " << roadLanes[0]->maxVelocity << std::endl;
+  // std::cout << "TSP min distance " << minimalDistance << " max acc "
+  //          << maximalAcceleration << " rand dec " << randomDeceleration
+  //          << " max vel " << roadLanes[0]->maxVelocity << std::endl;
 
   setTime(simulationDurationS * second);
   tsp_simulation_result results;
@@ -236,14 +236,14 @@ tsp_simulation_result SimulationKnospe::simulate(
   results.vehiclesDensity =
       static_cast<tsp_float>(carsToSpawnCount * minimalDistance) /
       static_cast<tsp_float>(roadLanes[0]->pointsCount * roadLanes.size());
-  std::cout << "TSP: results: " << results.vehiclesPerTime << " "
-            << results.vehiclesDensity << std::endl;
+  // std::cout << "TSP: results: " << results.vehiclesPerTime << " "
+  //          << results.vehiclesDensity << std::endl;
   return results;
 }
 
 bool SimulationKnospe::tspGetPositions(
     TSP::tsp_vehicle_position *vehiclePositions) {
-  std::cout << "TSP: vehicles size " << vehicles.size() << std::endl;
+  // std::cout << "TSP: vehicles size " << vehicles.size() << std::endl;
   for (int i = 0; i < vehicles.size(); i++) {
     vehiclePositions[i].lane = vehicles[i].lane;
     vehiclePositions[i].position = vehicles[i].position;

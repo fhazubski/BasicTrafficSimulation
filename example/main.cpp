@@ -30,7 +30,7 @@ template <typename T> void simulateAndSave(const char *filename, T data) {
   std::vector<TSP::tsp_simulation_result> results;
   data.simulationDurationS = (SIMULATE_QUICK ? 200 : 1000);
   for (TSP::tsp_float d = 0.8; d >= 0.01; d -= (SIMULATE_QUICK ? 0.05 : 0.01)) {
-    std::cout << "progress: " << d << std::endl;
+    // std::cout << "progress: " << d << std::endl;
     data.carDensity = d;
     for (int n = 0; n < (SIMULATE_QUICK ? 10 : 10); n++) {
       results.push_back(tspSimulate(data));
@@ -84,10 +84,14 @@ int main(int argc, char *argv[]) {
                     DataNaSchTrafficLightsOneFullSpeed());
     simulateAndSave("DataNaSchTrafficLightsThreeFullSpeed.csv",
                     DataNaSchTrafficLightsThreeFullSpeed());
+    simulateAndSave("DataNaSchTrafficLightsTwentyFullSpeed.csv",
+                    DataNaSchTrafficLightsTwentyFullSpeed());
     simulateAndSave("DataNaSchTrafficLightsOne08Speed.csv",
                     DataNaSchTrafficLightsOne08Speed());
     simulateAndSave("DataNaSchTrafficLightsThree08Speed.csv",
                     DataNaSchTrafficLightsThree08Speed());
+    simulateAndSave("DataNaSchTrafficLightsTwenty08Speed.csv",
+                    DataNaSchTrafficLightsTwenty08Speed());
 
     return 0;
   }
