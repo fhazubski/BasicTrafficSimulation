@@ -42,8 +42,7 @@ struct tsp_traffic_lights_data {
   tsp_int trafficLightsCount;
   tsp_float spacingPercent;
   tsp_float optimalSpeedPercentOfMaxSpeed;
-  tsp_float greenLightDurationS;
-  tsp_float redLightDurationS;
+  tsp_float redLightDurationPercent;
 };
 
 struct tsp_lane_point {

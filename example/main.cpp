@@ -11,8 +11,8 @@
 #include <fstream>
 #include <iostream>
 
-#define SIMULATE_AND_SAVE_TO_FILE 0
-#define SIMULATE_QUICK 1
+#define SIMULATE_AND_SAVE_TO_FILE 1
+#define SIMULATE_QUICK 0
 #define SIMULATE_KNOSPE 0
 
 struct simulationResultCompare {
@@ -90,6 +90,8 @@ int main(int argc, char *argv[]) {
                     DataNaSchTrafficLightsThree08Speed());
     simulateAndSave("DataNaSchTrafficLightsTwenty08Speed.csv",
                     DataNaSchTrafficLightsTwenty08Speed());
+    simulateAndSave("DataNaSchTrafficLightsThree04Speed.csv",
+                    DataNaSchTrafficLightsThree04Speed());
 
     return 0;
   }

@@ -85,12 +85,14 @@ void initializeNotRandomizedTrafficLights(
             << trafficLightsData.optimalSpeedPercentOfMaxSpeed << std::endl;
 
   tsp_int currentPosition = HelperMath::getRandomInt(0, lane.points.size() - 1);
-  tsp_int currentTime = 0;
-  tsp_int greenLightDuration = HelperMath::userTimeToSimulationTimeS(
-      trafficLightsData.greenLightDurationS);
-  tsp_int redLightDuration = HelperMath::userTimeToSimulationTimeS(
-      trafficLightsData.redLightDurationS);
+  tsp_float fullLapTime = std::round(
+      static_cast<tsp_float>(lane.points.size() * second) / optimalVelocity);
+  tsp_int redLightDuration = static_cast<tsp_int>(
+      fullLapTime * trafficLightsData.redLightDurationPercent);
+  tsp_int greenLightDuration =
+      static_cast<tsp_int>(fullLapTime) - redLightDuration;
   tsp_int trafficLightsToCreate = trafficLightsData.trafficLightsCount;
+  tsp_int currentTime = (trafficLightsToCreate + 1) * timeOffset;
 
   std::cout << "TSP: green light time: " << greenLightDuration
             << ", red light: " << redLightDuration << std::endl;
@@ -113,7 +115,7 @@ void initializeNotRandomizedTrafficLights(
     }
     lane.pointsWithTrafficLights[trafficLightsToCreate] = &point;
 
-    currentTime += timeOffset;
+    currentTime -= timeOffset;
     currentPosition += positionOffset;
   }
 }

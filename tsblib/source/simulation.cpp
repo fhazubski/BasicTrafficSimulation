@@ -1,6 +1,7 @@
 #include "source/simulation.h"
 #include "source/helpers/helper_math.h"
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <iostream>
 #include <iterator>
@@ -97,6 +98,8 @@ void Simulation::updateVehicleStatusAndPosition() {
   }
 
   for (auto &vehicle : vehicles) {
+    assert(vehicle.newVelocity <= roadLanes[vehicle.lane].maxVelocity);
+    assert(vehicle.newVelocity >= 0);
     vehicle.velocity = vehicle.newVelocity;
     if (vehicle.velocity > 0) {
       roadLanes[vehicle.lane].points[vehicle.position].vehicle = 0;
@@ -321,7 +324,8 @@ tsp_int Simulation::distanceToTheNearestRedTrafficLight(tsp_vehicle &vehicle) {
     return d;
   }
   for (auto trafficLight : roadLanes[vehicle.lane].pointsWithTrafficLights) {
-    if (trafficLight->isTrafficLightRed) {
+    if (trafficLight->isTrafficLightRed &&
+        trafficLight->position != vehicle.position) {
       tsp_int newDistance = trafficLight->position - vehicle.position;
       if (newDistance < 0) {
         newDistance += roadLanes[vehicle.lane].pointsCount;

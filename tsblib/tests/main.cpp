@@ -19,8 +19,7 @@ int main() {
   trafficLightsDataNotRandomized.trafficLightsCount = 3;
   trafficLightsDataNotRandomized.spacingPercent = 0.5;
   trafficLightsDataNotRandomized.optimalSpeedPercentOfMaxSpeed = 0.8;
-  trafficLightsDataNotRandomized.greenLightDurationS = 60;
-  trafficLightsDataNotRandomized.redLightDurationS = 30;
+  trafficLightsDataNotRandomized.redLightDurationPercent = 1.0 / 3.0;
 
   for (int i = 0; i < repeats; i++) {
     TSP::tsp_simulation_data_nasch simulationDataNaSch;

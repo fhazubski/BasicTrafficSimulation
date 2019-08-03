@@ -33,8 +33,7 @@ struct TrafficLightsSingleFullSpeedNotRandomized
     trafficLightsCount = 1;
     spacingPercent = 0.5;
     optimalSpeedPercentOfMaxSpeed = 1.0;
-    greenLightDurationS = 60;
-    redLightDurationS = 30;
+    redLightDurationPercent = 1.0 / 3.0;
   }
 };
 
@@ -149,6 +148,14 @@ struct DataNaSchTrafficLightsTwenty08Speed : DataNaSch {
   DataNaSchTrafficLightsTwenty08Speed() {
     trafficLightsData = TrafficLightsSingle08SpeedNotRandomized();
     trafficLightsData.trafficLightsCount = 20;
+  }
+};
+
+struct DataNaSchTrafficLightsThree04Speed : DataNaSch {
+  DataNaSchTrafficLightsThree04Speed() {
+    trafficLightsData = TrafficLightsSingle08SpeedNotRandomized();
+    trafficLightsData.optimalSpeedPercentOfMaxSpeed = 0.4;
+    trafficLightsData.trafficLightsCount = 3;
   }
 };
 
