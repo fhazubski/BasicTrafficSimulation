@@ -149,13 +149,13 @@ void Simulation::initialize(tsp_float newVehicleVelocityMps,
   if (minimalDistance < 1) {
     minimalDistance = 1;
   }
-  vehiclesCount = static_cast<tsp_int>(
+  tsp_int carsToSpawnCount = static_cast<tsp_int>(
       static_cast<tsp_float>(roadLanes[0].pointsCount / minimalDistance) *
       carDensity);
-  // std::cout << "TSP to spawn " << carsToSpawnCount << std::endl;
+  std::cout << "TSP: vehicles to spawn " << carsToSpawnCount << std::endl;
   tsp_int autonomousCarsToSpawnCount = static_cast<tsp_int>(std::round(
-      static_cast<tsp_float>(vehiclesCount) * autonomousCarsPercent));
-  tsp_int carsLeftToSpawn = vehiclesCount;
+      static_cast<tsp_float>(carsToSpawnCount) * autonomousCarsPercent));
+  tsp_int carsLeftToSpawn = carsToSpawnCount;
   std::vector<tsp_int> positions(carsLeftToSpawn);
   while (carsLeftToSpawn > 0) {
     tsp_int realSpacesCount = roadLanes[0].pointsCount / minimalDistance;
@@ -195,7 +195,7 @@ void Simulation::initialize(tsp_float newVehicleVelocityMps,
 tsp_simulation_result Simulation::gatherResults(tsp_float simulationDurationS) {
   setTime(simulationDurationS * second);
   tsp_simulation_result results;
-  if (vehiclesCount == 0) {
+  if (vehicles.size() == 0) {
     results.vehiclesPerTime = 0;
   } else {
     results.vehiclesPerTime =
@@ -204,7 +204,7 @@ tsp_simulation_result Simulation::gatherResults(tsp_float simulationDurationS) {
         1000.0 / simulationDurationS;
   }
   results.vehiclesDensity =
-      static_cast<tsp_float>(vehiclesCount * minimalDistance) /
+      static_cast<tsp_float>(vehicles.size() * minimalDistance) /
       static_cast<tsp_float>(roadLanes[0].pointsCount);
   // std::cout << "TSP: results: " << results.vehiclesPerTime << " "
   //          << results.vehiclesDensity << std::endl;
@@ -213,21 +213,52 @@ tsp_simulation_result Simulation::gatherResults(tsp_float simulationDurationS) {
 
 void Simulation::clear() {
   time = 0;
-  vehiclesCount = 0;
   spaceLengthM = 1.0;
   velocityDecreaseProbability = 0;
   vehiclesCoveredDistanceM = 0;
   roadLanes.clear();
   vehicles.clear();
 }
+tsp_int Simulation::getRoadLanesCount() { return roadLanes.size(); }
 
-bool Simulation::tspGetPositions(TSP::tsp_vehicle_position *vehiclePositions) {
-  // std::cout << "TSP: vehicles size " << vehicles.size() << std::endl;
-  for (int i = 0; i < vehicles.size(); i++) {
-    vehiclePositions[i].lane = vehicles[i].lane;
-    vehiclePositions[i].position = vehicles[i].position;
+tsp_int Simulation::getRoadLanePointsCount() {
+  if (roadLanes.empty()) {
+    return 0;
   }
-  return true;
+  return roadLanes[0].pointsCount;
+}
+
+tsp_int Simulation::getVehiclesCount() { return vehicles.size(); }
+
+void Simulation::getVehicles(tsp_vehicle_state *vehicleState) {
+  for (int i = 0; i < vehicles.size(); i++) {
+    vehicleState[i].lane = vehicles[i].lane;
+    vehicleState[i].position = vehicles[i].position;
+    vehicleState[i].velocity = vehicles[i].velocity;
+  }
+}
+
+tsp_int Simulation::getTrafficLightsCount() {
+  tsp_int trafficLightsCount = 0;
+  for (auto &lane : roadLanes) {
+    trafficLightsCount += lane.pointsWithTrafficLights.size();
+  }
+  return trafficLightsCount;
+}
+
+void Simulation::getTrafficLights(tsp_traffic_light_state *trafficLightState) {
+  tsp_id index = 0;
+  for (auto &lane : roadLanes) {
+    for (auto point : lane.pointsWithTrafficLights) {
+      trafficLightState[index].lane = lane.id;
+      trafficLightState[index].position = point->position;
+      trafficLightState[index].isTrafficLightRed = point->isTrafficLightRed;
+      trafficLightState[index].timeToNextState = static_cast<tsp_int>(
+          std::ceil(static_cast<tsp_float>(point->timeToNextState) /
+                    static_cast<tsp_float>(second)));
+      index++;
+    }
+  }
 }
 
 bool Simulation::setP(tsp_float p) {
@@ -243,6 +274,7 @@ bool Simulation::setSpaceLengthM(tsp_float a_spaceLengthM) {
     return false;
   }
   spaceLengthM = a_spaceLengthM;
+  return true;
 }
 /*
 bool Simulation::addVehicle(tsp_float width, tsp_float height,
@@ -270,7 +302,7 @@ HelperMath::lineToRotation(startRoad->lanes[startLane]->points); nextFree++;
 
   return true;
 }
-void Simulation::overrideAxleAngle(TSP::tsp_id vehicle, TSP::tsp_float angle) {
+void Simulation::overrideAxleAngle(tsp_id vehicle, tsp_float angle) {
   vehicles[vehicle].axleAngle = angle;
 }
 */

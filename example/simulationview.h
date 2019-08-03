@@ -16,7 +16,7 @@ public slots:
   void setSimulation(Simulation *simulation);
 
 private:
-  Simulation *m_simulation;
+  Simulation *m_simulation = nullptr;
 };
 
 #endif // SIMULATIONVIEW_H

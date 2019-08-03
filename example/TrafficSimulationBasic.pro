@@ -15,9 +15,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp \
     simulation.cpp \
-    vehicle.cpp \
     checkerboard.cpp \
-    obstacles.cpp \
     simulationview.cpp \
     globals.cpp
 
@@ -39,8 +37,6 @@ include(tslib.pri)
 HEADERS += \
     simulation.h \
     simulationdata.h \
-    vehicle.h \
     checkerboard.h \
-    obstacles.h \
     simulationview.h \
     globals.h

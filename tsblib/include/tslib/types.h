@@ -79,9 +79,17 @@ struct tsp_rotation {
   tsp_float rotation;
 };
 
-struct tsp_vehicle_position {
+struct tsp_vehicle_state {
   tsp_id lane;
   tsp_int position;
+  tsp_int velocity;
+};
+
+struct tsp_traffic_light_state {
+  tsp_id lane;
+  tsp_int position;
+  bool isTrafficLightRed;
+  tsp_int timeToNextState;
 };
 
 struct tsp_vehicle_base {
@@ -106,7 +114,9 @@ struct tsp_steeringAxle {
   tsp_float desiredAxleAngle;
 };
 
-struct tsp_vehicle : tsp_vehicle_position {
+struct tsp_vehicle {
+  tsp_id lane;
+  tsp_int position;
   tsp_int velocity;
   tsp_int newVelocity;
   tsp_id id;

@@ -15,7 +15,12 @@ public:
   void v2vCommunication();
   bool setP(tsp_float p);
   bool setSpaceLengthM(tsp_float a_spaceLengthM);
-  bool tspGetPositions(tsp_vehicle_position *vehiclePositions);
+  tsp_int getRoadLanesCount();
+  tsp_int getRoadLanePointsCount();
+  tsp_int getVehiclesCount();
+  void getVehicles(tsp_vehicle_state *vehicleState);
+  tsp_int getTrafficLightsCount();
+  void getTrafficLights(tsp_traffic_light_state *trafficLightState);
   void initialize(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
                   tsp_float randomDecelerationMps,
                   tsp_float vehicleOccupiedSpaceM, tsp_float carDensity,
@@ -30,7 +35,6 @@ private:
   tsp_int getRecommendedVelocity(tsp_vehicle &vehicle);
 
   tsp_int time = 0;
-  tsp_int vehiclesCount = 0;
   tsp_float spaceLengthM = 1.0;
   tsp_float velocityDecreaseProbability = 0;
   tsp_float vehiclesCoveredDistanceM = 0;

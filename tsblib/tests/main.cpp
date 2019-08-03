@@ -38,6 +38,10 @@ int main() {
 
     for (int i = 0; i < 20; i++) {
       tspInitializeSimulation(simulationDataNaSch);
+      tspGetRoadLanesCount();
+      tspGetRoadLanePointsCount();
+      tspGetTrafficLightsCount();
+      tspGetVehiclesCount();
       tspGatherResults(200);
     }
 

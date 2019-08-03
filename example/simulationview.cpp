@@ -12,27 +12,48 @@ void SimulationView::paint(QPainter *painter) {
   if (m_simulation == nullptr)
     return;
 
-  QBrush brush(QColor("#000000"));
-  painter->setBrush(brush);
+  int cellSize = width() / (m_simulation->m_roadLanePointsCount + 2);
+  int xStart = (width() - cellSize * m_simulation->m_roadLanePointsCount) / 2;
+  int yStart = (height() - cellSize * m_simulation->m_roadLanesCount) / 2;
 
-  double length = 120;
-  double vehicleWidth = width() / length;
-  std::cout << m_simulation->m_vehiclesPositions[0].position << std::endl;
-  std::cout << static_cast<double>(
-                   m_simulation->m_vehiclesPositions[0].position) *
-                   vehicleWidth
-            << " " << vehicleWidth << std::endl;
-  for (TSP::tsp_float i = 0; i < 120; i++) {
-    painter->drawLine(i * vehicleWidth, 100.0, i * vehicleWidth,
-                      100.0 + vehicleWidth);
+  painter->setBrush(QBrush(QColor("#00000000")));
+  painter->setPen("#000000");
+  for (int laneIndex = 0; laneIndex < m_simulation->m_roadLanesCount;
+       laneIndex++) {
+    for (int pointIndex = 0; pointIndex < m_simulation->m_roadLanePointsCount;
+         pointIndex++) {
+      painter->drawRect(xStart + pointIndex * cellSize,
+                        yStart + laneIndex * cellSize, cellSize, cellSize);
+    }
   }
-  for (int i = 0; i < m_simulation->m_vehicles.size(); i++) {
-    painter->fillRect(
-        QRectF(
-            static_cast<double>(m_simulation->m_vehiclesPositions[i].position) *
-                vehicleWidth,
-            100.0, vehicleWidth, vehicleWidth),
-        brush);
+
+  painter->setBrush(QBrush(QColor("#00CCFF")));
+  for (TSP::tsp_vehicle_state *vehicle = m_simulation->m_vehiclesStates;
+       vehicle < m_simulation->m_vehiclesStates + m_simulation->m_vehiclesCount;
+       vehicle++) {
+    QRectF rect(xStart + vehicle->position * cellSize,
+                yStart + vehicle->lane * cellSize, cellSize, cellSize);
+    painter->drawRect(rect);
+    painter->drawText(rect, Qt::AlignCenter,
+                      QString::number(vehicle->velocity));
+  }
+
+  QBrush greenLight(QColor("#A3FF6A"));
+  QBrush redLight(QColor("#FF5B88"));
+  for (TSP::tsp_traffic_light_state *light =
+           m_simulation->m_trafficLightsStates;
+       light <
+       m_simulation->m_trafficLightsStates + m_simulation->m_trafficLightsCount;
+       light++) {
+    painter->setBrush(light->isTrafficLightRed ? redLight : greenLight);
+    QRectF rect(xStart + light->position * cellSize,
+                yStart - cellSize * 3 / 4 + light->lane * cellSize, cellSize,
+                cellSize);
+    painter->setPen("#00000000");
+    painter->drawRoundRect(rect, rect.x() / 2, rect.y() / 2);
+    painter->setPen("#000000");
+    painter->drawText(rect, Qt::AlignCenter,
+                      QString::number(light->timeToNextState));
   }
 }
 

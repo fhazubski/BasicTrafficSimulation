@@ -1,11 +1,9 @@
 #include "checkerboard.h"
 #include "globals.h"
-#include "obstacles.h"
 #include "simulation.h"
 #include "simulationdata.h"
 #include "simulationview.h"
 #include "tslib/api.h"
-#include "vehicle.h"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
@@ -13,8 +11,8 @@
 #include <fstream>
 #include <iostream>
 
-#define SIMULATE_AND_SAVE_TO_FILE 1
-#define SIMULATE_QUICK 0
+#define SIMULATE_AND_SAVE_TO_FILE 0
+#define SIMULATE_QUICK 1
 #define SIMULATE_KNOSPE 0
 
 struct simulationResultCompare {
@@ -28,12 +26,12 @@ template <typename T> void simulateAndSave(const char *filename, T data) {
   std::ofstream outCsv;
   outCsv.open(filename);
   std::vector<TSP::tsp_simulation_result> results;
-  data.simulationDurationS = (SIMULATE_QUICK ? 200 : 1000);
   for (TSP::tsp_float d = 0.8; d >= 0.01; d -= (SIMULATE_QUICK ? 0.05 : 0.01)) {
     // std::cout << "progress: " << d << std::endl;
     data.carDensity = d;
     for (int n = 0; n < (SIMULATE_QUICK ? 10 : 10); n++) {
-      results.push_back(tspSimulate(data));
+      tspInitializeSimulation(data);
+      results.push_back(tspGatherResults((SIMULATE_QUICK ? 200 : 1000)));
     }
   }
 
@@ -95,13 +93,10 @@ int main(int argc, char *argv[]) {
 
     return 0;
   }
-  Simulation simulation;
 
-  engine.rootContext()->setContextProperty("simulation", &simulation);
-  qmlRegisterType<Vehicle>("Vehicle", 1, 0, "Vehicle");
   qmlRegisterType<Checkerboard>("Checkerboard", 1, 0, "Checkerboard");
-  qmlRegisterType<Obstacles>("Obstacles", 1, 0, "Obstacles");
-  qmlRegisterType<SimulationView>("SimulationView", 1, 0, "SimulationView");
+  qmlRegisterType<Simulation>("Simulation", 1, 0, "Simulation");
+  qmlRegisterType<SimulationView>("Simulation", 1, 0, "SimulationView");
 
   engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
   if (engine.rootObjects().isEmpty())

@@ -178,7 +178,7 @@ void SimulationKnospe::initialize(tsp_float newVehicleVelocityMps,
     minimalDistance = 1;
   }
   allowLaneChanging = a_allowLaneChanging;
-  vehiclesCount = 0;
+  tsp_int carsToSpawnCount = 0;
   tsp_int safetyGap =
       static_cast<tsp_int>(std::ceil(safetyGapM / spaceLengthM));
   for (auto lane : roadLanes) {
@@ -186,7 +186,7 @@ void SimulationKnospe::initialize(tsp_float newVehicleVelocityMps,
         static_cast<tsp_float>(lane->pointsCount / minimalDistance);
     tsp_int carsLeftToSpawn =
         static_cast<tsp_int>(realSpacesCount * carDensity);
-    vehiclesCount += carsLeftToSpawn;
+    carsToSpawnCount += carsLeftToSpawn;
     // std::cout << "TSP to spawn " << carsLeftToSpawn << std::endl;
     tsp_int newVelocity =
         static_cast<tsp_int>(newVehicleVelocityMps / spaceLengthM);
@@ -226,7 +226,7 @@ tsp_simulation_result
 SimulationKnospe::gatherResults(tsp_float simulationDurationS) {
   setTime(simulationDurationS * second);
   tsp_simulation_result results;
-  if (vehiclesCount == 0) {
+  if (vehicles.size() == 0) {
     results.vehiclesPerTime = 0;
   } else {
     tsp_float allRoadsDistance = 0;
@@ -238,7 +238,7 @@ SimulationKnospe::gatherResults(tsp_float simulationDurationS) {
                               1000.0 / simulationDurationS;
   }
   results.vehiclesDensity =
-      static_cast<tsp_float>(vehiclesCount * minimalDistance) /
+      static_cast<tsp_float>(vehicles.size() * minimalDistance) /
       static_cast<tsp_float>(roadLanes[0]->pointsCount * roadLanes.size());
   // std::cout << "TSP: results: " << results.vehiclesPerTime << " "
   //          << results.vehiclesDensity << std::endl;
@@ -250,7 +250,6 @@ void SimulationKnospe::clear() {
     delete lane;
   }
   time = 0;
-  vehiclesCount = 0;
   spaceLengthM = 1.0;
   velocityDecreaseProbabilityWhenNextIsBreaking = 0;
   velocityDecreaseProbabilityWhenStopped = 0;
@@ -259,16 +258,6 @@ void SimulationKnospe::clear() {
 
   roadLanes.clear();
   vehicles.clear();
-}
-
-bool SimulationKnospe::tspGetPositions(
-    TSP::tsp_vehicle_position *vehiclePositions) {
-  // std::cout << "TSP: vehicles size " << vehicles.size() << std::endl;
-  for (int i = 0; i < vehicles.size(); i++) {
-    vehiclePositions[i].lane = vehicles[i].lane;
-    vehiclePositions[i].position = vehicles[i].position;
-  }
-  return true;
 }
 
 bool SimulationKnospe::setPb(tsp_float pb) {

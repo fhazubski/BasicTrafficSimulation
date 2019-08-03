@@ -51,64 +51,53 @@ tspGatherResults(TSP::tsp_float simulationDurationS) {
   return naSchSimulation.gatherResults(simulationDurationS);
 }
 
-bool tspAddVehicle(TSP::tsp_id lane, TSP::tsp_int velocity) {
-  return 0 * lane * velocity;
-  // return simulation.addVehicle(lane, 0, velocity);
-}
-
-TSP::tsp_id tspAddLane(TSP::tsp_float length) {
-  // if (length < 1)
-  return -1 + (tsp_id)length * 0;
-  // return simulation.addLane(7.5, length, 5);
-}
-
 bool tspSetTime(TSP::tsp_float time) {
-  return false * time;
-  // return simulation.setTime(time);
-}
-
-bool tspGetPositions(TSP::tsp_vehicle_position *vehiclePositions) {
-  return false * (uintptr_t)vehiclePositions;
-  // return simulation.tspGetPositions(vehiclePositions);
-}
-
-bool tspSetVelocityDecreaseProbability(TSP::tsp_float p) {
-  return false * p;
-  // return simulation.setP(p);
-}
-
-/*
-TSP::tsp_vehicle *tspReserveVehicleMemory(TSP::tsp_int vehiclesCount) {
-  return simulation.reserveVehicleMemory(vehiclesCount);
-}
-
-TSP::tsp_obstacle_line *tspReserveObstacleMemory(TSP::tsp_int obstacleCount) {
-  return simulation.reserveObstacleMemory(obstacleCount);
-}
-bool tspAddVehicle(TSP::tsp_float width, TSP::tsp_float height,
-                   TSP::tsp_float axleDistance,
-                   TSP::tsp_float frontWheelsDistance, TSP::tsp_float velocity,
-                   const TSP::tsp_road *const startRoad,
-                   TSP::tsp_int startLane) {
-  if (!HelperMath::inRange<tsp_float>(axleDistance, 0.0, height) &&
-      axleDistance != 0.0) {
-    std::cerr << "Axle value is less than or equal zero or greater than height"
-              << std::endl;
-    return false;
+  if (useKnospeSimulation) {
+    return knospeSimulation.setTime(time);
   }
-
-  velocity = HelperMath::kmphToMps(velocity);
-
-  return simulation.addVehicle(width, height, axleDistance, frontWheelsDistance,
-                               velocity, startRoad, startLane);
+  return naSchSimulation.setTime(time);
 }
 
-void tspOverrideAxleAngle(TSP::tsp_id vehicle, TSP::tsp_float angle) {
-  angle = HelperMath::degreeToRadian(angle);
-  simulation.overrideAxleAngle(vehicle, angle);
+TSP::tsp_int tspGetRoadLanesCount() {
+  if (useKnospeSimulation) {
+    return knospeSimulation.getRoadLanesCount();
+  }
+  return naSchSimulation.getRoadLanesCount();
 }
 
-bool tspSetTime(TSP::tsp_float time) { return simulation.setTime(time); }
+TSP::tsp_int tspGetRoadLanePointsCount() {
+  if (useKnospeSimulation) {
+    return knospeSimulation.getRoadLanePointsCount();
+  }
+  return naSchSimulation.getRoadLanePointsCount();
+}
 
-TSP::tsp_vehicle_position *tspGetPositions() { return nullptr; }
-*/
+TSP::tsp_int tspGetVehiclesCount() {
+  if (useKnospeSimulation) {
+    return knospeSimulation.getVehiclesCount();
+  }
+  return naSchSimulation.getVehiclesCount();
+}
+
+void tspGetVehicles(TSP::tsp_vehicle_state *vehicleState) {
+  if (useKnospeSimulation) {
+    knospeSimulation.getVehicles(vehicleState);
+    return;
+  }
+  naSchSimulation.getVehicles(vehicleState);
+}
+
+TSP::tsp_int tspGetTrafficLightsCount() {
+  if (useKnospeSimulation) {
+    return knospeSimulation.getTrafficLightsCount();
+  }
+  return naSchSimulation.getTrafficLightsCount();
+}
+
+void tspGetTrafficLights(TSP::tsp_traffic_light_state *trafficLightState) {
+  if (useKnospeSimulation) {
+    knospeSimulation.getTrafficLights(trafficLightState);
+    return;
+  }
+  naSchSimulation.getTrafficLights(trafficLightState);
+}

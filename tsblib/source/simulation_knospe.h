@@ -19,10 +19,21 @@ public:
   bool setP0(tsp_float p0);
   bool setPd(tsp_float pd);
   bool setSpaceLengthM(tsp_float a_spaceLengthM);
-  bool tspGetPositions(tsp_vehicle_position *vehiclePositions);
+  tsp_int getRoadLanesCount() { return 0; }
+  tsp_int getRoadLanePointsCount() { return 0; }
+  tsp_int getVehiclesCount() { return 0; }
+  void getVehicles(tsp_vehicle_state *vehicleState) {
+    (void *)vehicleState;
+    return;
+  }
+  tsp_int getTrafficLightsCount() { return 0; }
+  void getTrafficLights(tsp_traffic_light_state *trafficLightState) {
+    (void *)trafficLightState;
+    return;
+  }
   void initialize(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
                   tsp_float randomDecelerationMps,
-                  tsp_float vehicleOccupiedSpaceM, TSP::tsp_float safetyGapM,
+                  tsp_float vehicleOccupiedSpaceM, tsp_float safetyGapM,
                   tsp_float carDensity, tsp_float safeTimeHeadwayS,
                   bool a_allowLaneChanging);
   tsp_simulation_result gatherResults(tsp_float simulationDurationS);
@@ -46,7 +57,6 @@ private:
   tsp_vehicle &getNextVehicle(tsp_vehicle &vehicle);
 
   tsp_float time = 0;
-  tsp_int vehiclesCount = 0;
   tsp_float spaceLengthM = 1.0;
   tsp_float velocityDecreaseProbabilityWhenNextIsBreaking = 0;
   tsp_float velocityDecreaseProbabilityWhenStopped = 0;
