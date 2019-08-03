@@ -51,8 +51,7 @@ bool Simulation::addVehicle(tsp_id startLane, tsp_int startPosition,
   return true;
 }
 
-tsp_id Simulation::addLane(tsp_float spaceLengthM, tsp_float lengthM,
-                           tsp_int maxVelocity,
+tsp_id Simulation::addLane(tsp_float lengthM, tsp_int maxVelocity,
                            tsp_traffic_lights_data &trafficLightsData) {
   tsp_int spacesCount =
       static_cast<tsp_int>(std::round(lengthM / spaceLengthM));
@@ -139,24 +138,24 @@ void Simulation::v2vCommunication() {
   }
 }
 
-tsp_simulation_result
-Simulation::simulate(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
-                     tsp_float randomDecelerationMps,
-                     tsp_float vehicleOccupiedSpaceM, tsp_float spaceLengthM,
-                     tsp_float carDensity, tsp_float simulationDurationS,
-                     tsp_float autonomousCarsPercent) {
+void Simulation::initialize(tsp_float newVehicleVelocityMps,
+                            tsp_float accelerationMps,
+                            tsp_float randomDecelerationMps,
+                            tsp_float vehicleOccupiedSpaceM,
+                            tsp_float carDensity,
+                            tsp_float autonomousCarsPercent) {
   minimalDistance =
       static_cast<tsp_int>(std::ceil(vehicleOccupiedSpaceM / spaceLengthM));
   if (minimalDistance < 1) {
     minimalDistance = 1;
   }
-  tsp_int carsToSpawnCount = static_cast<tsp_int>(
+  vehiclesCount = static_cast<tsp_int>(
       static_cast<tsp_float>(roadLanes[0].pointsCount / minimalDistance) *
       carDensity);
   // std::cout << "TSP to spawn " << carsToSpawnCount << std::endl;
   tsp_int autonomousCarsToSpawnCount = static_cast<tsp_int>(std::round(
-      static_cast<tsp_float>(carsToSpawnCount) * autonomousCarsPercent));
-  tsp_int carsLeftToSpawn = carsToSpawnCount;
+      static_cast<tsp_float>(vehiclesCount) * autonomousCarsPercent));
+  tsp_int carsLeftToSpawn = vehiclesCount;
   std::vector<tsp_int> positions(carsLeftToSpawn);
   while (carsLeftToSpawn > 0) {
     tsp_int realSpacesCount = roadLanes[0].pointsCount / minimalDistance;
@@ -191,10 +190,12 @@ Simulation::simulate(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
   // std::cout << "TSP min distance " << minimalDistance << " max acc "
   //          << maximalAcceleration << " rand dec " << randomDeceleration
   //          << " max vel " << roadLanes[0].maxVelocity << std::endl;
+}
 
+tsp_simulation_result Simulation::gatherResults(tsp_float simulationDurationS) {
   setTime(simulationDurationS * second);
   tsp_simulation_result results;
-  if (carsToSpawnCount == 0) {
+  if (vehiclesCount == 0) {
     results.vehiclesPerTime = 0;
   } else {
     results.vehiclesPerTime =
@@ -203,11 +204,21 @@ Simulation::simulate(tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
         1000.0 / simulationDurationS;
   }
   results.vehiclesDensity =
-      static_cast<tsp_float>(carsToSpawnCount * minimalDistance) /
+      static_cast<tsp_float>(vehiclesCount * minimalDistance) /
       static_cast<tsp_float>(roadLanes[0].pointsCount);
   // std::cout << "TSP: results: " << results.vehiclesPerTime << " "
   //          << results.vehiclesDensity << std::endl;
   return results;
+}
+
+void Simulation::clear() {
+  time = 0;
+  vehiclesCount = 0;
+  spaceLengthM = 1.0;
+  velocityDecreaseProbability = 0;
+  vehiclesCoveredDistanceM = 0;
+  roadLanes.clear();
+  vehicles.clear();
 }
 
 bool Simulation::tspGetPositions(TSP::tsp_vehicle_position *vehiclePositions) {
@@ -225,6 +236,13 @@ bool Simulation::setP(tsp_float p) {
   }
   velocityDecreaseProbability = p;
   return true;
+}
+
+bool Simulation::setSpaceLengthM(tsp_float a_spaceLengthM) {
+  if (a_spaceLengthM <= 0.0) {
+    return false;
+  }
+  spaceLengthM = a_spaceLengthM;
 }
 /*
 bool Simulation::addVehicle(tsp_float width, tsp_float height,

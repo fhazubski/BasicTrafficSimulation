@@ -6,32 +6,49 @@
 #include "tslib/types.h"
 #include <iostream>
 
-TSP::tsp_simulation_result tspSimulate(TSP::tsp_simulation_data_nasch data) {
-  Simulation simulation;
-  simulation.addLane(
-      data.spaceLengthM, data.laneLengthM,
+namespace TSP {
+Simulation naSchSimulation;
+SimulationKnospe knospeSimulation;
+bool useKnospeSimulation;
+} // namespace TSP
+
+void tspInitializeSimulation(TSP::tsp_simulation_data_nasch data) {
+  naSchSimulation.clear();
+  useKnospeSimulation = false;
+  naSchSimulation.setSpaceLengthM(data.spaceLengthM);
+  naSchSimulation.addLane(
+      data.laneLengthM,
       static_cast<tsp_int>(std::round(data.maxVelocityMps / data.spaceLengthM)),
       data.trafficLightsData);
-  simulation.setP(data.velocityDecreaseProbability);
-  return simulation.simulate(
-      data.newVehicleVelocityMps, data.accelerationMps,
-      data.randomDecelerationMps, data.vehicleOccupiedSpaceM, data.spaceLengthM,
-      data.carDensity, data.simulationDurationS, data.autonomousCarsPercent);
+  naSchSimulation.setP(data.velocityDecreaseProbability);
+  naSchSimulation.initialize(data.newVehicleVelocityMps, data.accelerationMps,
+                             data.randomDecelerationMps,
+                             data.vehicleOccupiedSpaceM, data.carDensity,
+                             data.autonomousCarsPercent);
 }
 
-TSP::tsp_simulation_result tspSimulate(TSP::tsp_simulation_data_knospe data) {
-  SimulationKnospe simulation;
-  simulation.addLane(data.spaceLengthM, data.laneLengthM, data.laneCount,
-                     static_cast<tsp_int>(
-                         std::round(data.maxVelocityMps / data.spaceLengthM)));
-  simulation.setPb(data.velocityDecreaseProbabilityB);
-  simulation.setP0(data.velocityDecreaseProbability0);
-  simulation.setPd(data.velocityDecreaseProbabilityD);
-  return simulation.simulate(
+void tspInitializeSimulation(TSP::tsp_simulation_data_knospe data) {
+  knospeSimulation.clear();
+  useKnospeSimulation = true;
+  naSchSimulation.setSpaceLengthM(data.spaceLengthM);
+  knospeSimulation.addLane(data.laneLengthM, data.laneCount,
+                           static_cast<tsp_int>(std::round(data.maxVelocityMps /
+                                                           data.spaceLengthM)));
+  knospeSimulation.setPb(data.velocityDecreaseProbabilityB);
+  knospeSimulation.setP0(data.velocityDecreaseProbability0);
+  knospeSimulation.setPd(data.velocityDecreaseProbabilityD);
+  knospeSimulation.initialize(
       data.newVehicleVelocityMps, data.accelerationMps,
-      data.randomDecelerationMps, data.vehicleOccupiedSpaceM, data.spaceLengthM,
-      data.safetyGapM, data.carDensity, data.simulationDurationS,
-      data.safeTimeHeadwayS, data.allowLaneChanging);
+      data.randomDecelerationMps, data.vehicleOccupiedSpaceM, data.safetyGapM,
+      data.carDensity, data.safeTimeHeadwayS, data.allowLaneChanging);
+}
+
+TSP::tsp_simulation_result
+tspGatherResults(TSP::tsp_float simulationDurationS) {
+  if (useKnospeSimulation) {
+    return knospeSimulation.gatherResults(simulationDurationS);
+  }
+  return naSchSimulation.gatherResults(simulationDurationS);
 }
 
 bool tspAddVehicle(TSP::tsp_id lane, TSP::tsp_int velocity) {

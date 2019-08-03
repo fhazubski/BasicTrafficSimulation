@@ -33,23 +33,25 @@ int main() {
     simulationDataNaSch.spaceLengthM = 7.5;
     simulationDataNaSch.laneLengthM = 1000;
     simulationDataNaSch.carDensity = 0.33;
-    simulationDataNaSch.simulationDurationS = 200;
     simulationDataNaSch.autonomousCarsPercent = 0.0;
     simulationDataNaSch.trafficLightsData = trafficLightsData;
 
     for (int i = 0; i < 20; i++) {
-      tspSimulate(simulationDataNaSch);
+      tspInitializeSimulation(simulationDataNaSch);
+      tspGatherResults(200);
     }
 
     simulationDataNaSch.autonomousCarsPercent = 0.5;
     for (int i = 0; i < 20; i++) {
-      tspSimulate(simulationDataNaSch);
+      tspInitializeSimulation(simulationDataNaSch);
+      tspGatherResults(200);
     }
 
     simulationDataNaSch.autonomousCarsPercent = 1.0;
     simulationDataNaSch.trafficLightsData = trafficLightsDataNotRandomized;
     for (int i = 0; i < 20; i++) {
-      tspSimulate(simulationDataNaSch);
+      tspInitializeSimulation(simulationDataNaSch);
+      tspGatherResults(200);
     }
 
     TSP::tsp_simulation_data_knospe simulationData;
@@ -67,20 +69,22 @@ int main() {
     simulationData.laneCount = 2;
     simulationData.laneLengthM = 1000;
     simulationData.carDensity = 0.3;
-    simulationData.simulationDurationS = 500;
     simulationData.allowLaneChanging = true;
 
     for (int i = 0; i < 20; i++) {
-      tspSimulate(simulationData);
+      tspInitializeSimulation(simulationData);
+      tspGatherResults(500);
     }
 
-    simulationData.simulationDurationS = 10000;
     simulationData.carDensity = 0.015;
-    tspSimulate(simulationData);
+    tspInitializeSimulation(simulationData);
+    tspGatherResults(10000);
     simulationData.carDensity = 0.010;
-    tspSimulate(simulationData);
+    tspInitializeSimulation(simulationData);
+    tspGatherResults(10000);
     simulationData.carDensity = 0.005;
-    tspSimulate(simulationData);
+    tspInitializeSimulation(simulationData);
+    tspGatherResults(10000);
   }
   return 0;
 }

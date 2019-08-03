@@ -135,7 +135,6 @@ struct tsp_simulation_data_nasch {
   tsp_float spaceLengthM;
   tsp_float laneLengthM;
   tsp_float carDensity;
-  tsp_float simulationDurationS;
   tsp_float autonomousCarsPercent;
   tsp_traffic_lights_data trafficLightsData;
 };
@@ -155,7 +154,6 @@ struct tsp_simulation_data_knospe {
   tsp_int laneCount;
   tsp_float laneLengthM;
   tsp_float carDensity;
-  tsp_float simulationDurationS;
   bool allowLaneChanging = true;
 };
 

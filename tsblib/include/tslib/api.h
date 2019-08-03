@@ -2,11 +2,12 @@
 #include "tslib/types.h"
 #include "tslib_export.h"
 
-TSP::tsp_simulation_result TSLIB_EXPORT
-tspSimulate(TSP::tsp_simulation_data_nasch data);
+void TSLIB_EXPORT tspInitializeSimulation(TSP::tsp_simulation_data_nasch data);
+
+void TSLIB_EXPORT tspInitializeSimulation(TSP::tsp_simulation_data_knospe data);
 
 TSP::tsp_simulation_result TSLIB_EXPORT
-tspSimulate(TSP::tsp_simulation_data_knospe data);
+tspGatherResults(TSP::tsp_float simulationDurationS);
 
 bool TSLIB_EXPORT tspAddVehicle(TSP::tsp_id lane, TSP::tsp_int velocity);
 

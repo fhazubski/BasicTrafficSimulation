@@ -37,8 +37,8 @@ bool SimulationKnospe::addVehicle(tsp_id startLane, tsp_int startPosition,
   return true;
 }
 
-tsp_id SimulationKnospe::addLane(tsp_float spaceLengthM, tsp_float lengthM,
-                                 tsp_int laneCount, tsp_int maxVelocity) {
+tsp_id SimulationKnospe::addLane(tsp_float lengthM, tsp_int laneCount,
+                                 tsp_int maxVelocity) {
   tsp_int spacesCount =
       static_cast<tsp_int>(std::round(lengthM / spaceLengthM));
   for (int i = 0; i < laneCount; i++) {
@@ -165,19 +165,20 @@ bool SimulationKnospe::setTime(tsp_float newTime) {
   return true;
 }
 
-tsp_simulation_result SimulationKnospe::simulate(
-    tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
-    tsp_float randomDecelerationMps, tsp_float vehicleOccupiedSpaceM,
-    tsp_float spaceLengthM, TSP::tsp_float safetyGapM, tsp_float carDensity,
-    tsp_float simulationDurationS, tsp_float safeTimeHeadwayS,
-    bool a_allowLaneChanging) {
+void SimulationKnospe::initialize(tsp_float newVehicleVelocityMps,
+                                  tsp_float accelerationMps,
+                                  tsp_float randomDecelerationMps,
+                                  tsp_float vehicleOccupiedSpaceM,
+                                  tsp_float safetyGapM, tsp_float carDensity,
+                                  tsp_float safeTimeHeadwayS,
+                                  bool a_allowLaneChanging) {
   minimalDistance =
       static_cast<tsp_int>(std::ceil(vehicleOccupiedSpaceM / spaceLengthM));
   if (minimalDistance < 1) {
     minimalDistance = 1;
   }
   allowLaneChanging = a_allowLaneChanging;
-  tsp_int carsToSpawnCount = 0;
+  vehiclesCount = 0;
   tsp_int safetyGap =
       static_cast<tsp_int>(std::ceil(safetyGapM / spaceLengthM));
   for (auto lane : roadLanes) {
@@ -185,7 +186,7 @@ tsp_simulation_result SimulationKnospe::simulate(
         static_cast<tsp_float>(lane->pointsCount / minimalDistance);
     tsp_int carsLeftToSpawn =
         static_cast<tsp_int>(realSpacesCount * carDensity);
-    carsToSpawnCount += carsLeftToSpawn;
+    vehiclesCount += carsLeftToSpawn;
     // std::cout << "TSP to spawn " << carsLeftToSpawn << std::endl;
     tsp_int newVelocity =
         static_cast<tsp_int>(newVehicleVelocityMps / spaceLengthM);
@@ -219,10 +220,13 @@ tsp_simulation_result SimulationKnospe::simulate(
   // std::cout << "TSP min distance " << minimalDistance << " max acc "
   //          << maximalAcceleration << " rand dec " << randomDeceleration
   //          << " max vel " << roadLanes[0]->maxVelocity << std::endl;
+}
 
+tsp_simulation_result
+SimulationKnospe::gatherResults(tsp_float simulationDurationS) {
   setTime(simulationDurationS * second);
   tsp_simulation_result results;
-  if (carsToSpawnCount == 0) {
+  if (vehiclesCount == 0) {
     results.vehiclesPerTime = 0;
   } else {
     tsp_float allRoadsDistance = 0;
@@ -234,11 +238,27 @@ tsp_simulation_result SimulationKnospe::simulate(
                               1000.0 / simulationDurationS;
   }
   results.vehiclesDensity =
-      static_cast<tsp_float>(carsToSpawnCount * minimalDistance) /
+      static_cast<tsp_float>(vehiclesCount * minimalDistance) /
       static_cast<tsp_float>(roadLanes[0]->pointsCount * roadLanes.size());
   // std::cout << "TSP: results: " << results.vehiclesPerTime << " "
   //          << results.vehiclesDensity << std::endl;
   return results;
+}
+
+void SimulationKnospe::clear() {
+  for (auto lane : roadLanes) {
+    delete lane;
+  }
+  time = 0;
+  vehiclesCount = 0;
+  spaceLengthM = 1.0;
+  velocityDecreaseProbabilityWhenNextIsBreaking = 0;
+  velocityDecreaseProbabilityWhenStopped = 0;
+  velocityDecreaseProbability = 0;
+  vehiclesCoveredDistanceM = 0;
+
+  roadLanes.clear();
+  vehicles.clear();
 }
 
 bool SimulationKnospe::tspGetPositions(
@@ -272,6 +292,14 @@ bool SimulationKnospe::setPd(tsp_float pd) {
     return false;
   }
   velocityDecreaseProbability = pd;
+  return true;
+}
+
+bool SimulationKnospe::setSpaceLengthM(tsp_float a_spaceLengthM) {
+  if (a_spaceLengthM <= 0.0) {
+    return false;
+  }
+  spaceLengthM = a_spaceLengthM;
   return true;
 }
 
