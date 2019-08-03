@@ -7,31 +7,9 @@
 #include <iterator>
 
 namespace TSP {
-/*
-tsp_vehicle *Simulation::reserveVehicleMemory(tsp_int count) {
-  if (vehicles != nullptr) {
-    delete[] vehicles;
-  }
-  vehicles = new tsp_vehicle[count];
-  reservedVehiclesCount = count;
-  vehiclesCount = 0;
-  nextFree = 0;
-  return vehicles;
-}
 
-tsp_obstacle_line *Simulation::reserveObstacleMemory(tsp_int count) {
-  if (obstacles != nullptr) {
-    delete[] obstacles;
-  }
-  obstacles = new tsp_obstacle_line[count];
-  obstacleLinesCount = count;
-  return obstacles;
-}
-*/
 bool Simulation::addVehicle(tsp_id startLane, tsp_int startPosition,
                             tsp_int velocity, bool isAutonomous) {
-  // std::cout << "TSP: lane " << startLane << " " << roadLanes.size()
-  //          << std::endl;
   if (startLane >= roadLanes.size() ||
       startPosition >= roadLanes[startLane].pointsCount ||
       roadLanes[startLane].points[startPosition].vehicle != 0) {
@@ -46,8 +24,6 @@ bool Simulation::addVehicle(tsp_id startLane, tsp_int startPosition,
   vehicle.isAutonomous = isAutonomous;
   vehicles.push_back(vehicle);
   roadLanes[startLane].points[startPosition].vehicle = vehicles.back().id;
-
-  // std::cout << "TSP: new vehicles size: " << vehicles.size() << std::endl;
 
   return true;
 }
@@ -85,9 +61,6 @@ void Simulation::updateVehicleStatusAndPosition() {
     vehicle.newVelocity = getNewVelocity(vehicle);
 
     auto randomValue = HelperMath::getRandom();
-    // std::cout << "TSP: rand " << randomValue << " "
-    //          << velocityDecreaseProbability << " " << vehicle->velocity
-    //          << std::endl;
     if ((!vehicle.isAutonomous) &&
         (randomValue <= velocityDecreaseProbability)) {
       if (vehicle.newVelocity > randomDeceleration)
@@ -190,9 +163,6 @@ void Simulation::initialize(tsp_float newVehicleVelocityMps,
       static_cast<tsp_int>(std::round(accelerationMps / spaceLengthM));
   randomDeceleration =
       static_cast<tsp_int>(std::round(randomDecelerationMps / spaceLengthM));
-  // std::cout << "TSP min distance " << minimalDistance << " max acc "
-  //          << maximalAcceleration << " rand dec " << randomDeceleration
-  //          << " max vel " << roadLanes[0].maxVelocity << std::endl;
 }
 
 tsp_simulation_result Simulation::gatherResults(tsp_float simulationDurationS) {
@@ -209,8 +179,6 @@ tsp_simulation_result Simulation::gatherResults(tsp_float simulationDurationS) {
   results.vehiclesDensity =
       static_cast<tsp_float>(vehicles.size() * minimalDistance) /
       static_cast<tsp_float>(roadLanes[0].pointsCount);
-  // std::cout << "TSP: results: " << results.vehiclesPerTime << " "
-  //          << results.vehiclesDensity << std::endl;
   return results;
 }
 
@@ -279,36 +247,6 @@ bool Simulation::setSpaceLengthM(tsp_float a_spaceLengthM) {
   spaceLengthM = a_spaceLengthM;
   return true;
 }
-/*
-bool Simulation::addVehicle(tsp_float width, tsp_float height,
-                            tsp_float axleDistance,
-                            tsp_float frontWheelsDistance, tsp_float velocity,
-                            const tsp_road *const startRoad,
-                            tsp_int startLane) {
-  if (nextFree >= reservedVehiclesCount) {
-    return false;
-  }
-  vehicles[nextFree] = tsp_vehicle(startRoad);
-  vehicles[nextFree].id = nextFree;
-  vehicles[nextFree].width = width;
-  vehicles[nextFree].height = height;
-  vehicles[nextFree].axleAngle = 0.0;
-  vehicles[nextFree].frontWheelsDistance = frontWheelsDistance;
-  vehicles[nextFree].axleDistance = axleDistance;
-  vehicles[nextFree].velocity = velocity;
-  vehicles[nextFree].followedLane = startLane;
-  vehicles[nextFree].x = startRoad->lanes[startLane]->points[0].x;
-  vehicles[nextFree].y = startRoad->lanes[startLane]->points[0].y;
-  vehicles[nextFree].rotation =
-HelperMath::lineToRotation(startRoad->lanes[startLane]->points); nextFree++;
-  vehiclesCount = nextFree;
-
-  return true;
-}
-void Simulation::overrideAxleAngle(tsp_id vehicle, tsp_float angle) {
-  vehicles[vehicle].axleAngle = angle;
-}
-*/
 
 tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle &vehicle) {
   tsp_int d = vehicles[vehicle.nextVehicle - 1].position - vehicle.position;

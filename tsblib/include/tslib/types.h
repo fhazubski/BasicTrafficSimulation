@@ -66,7 +66,6 @@ struct tsp_road_lane {
   const tsp_int maxVelocity;
   const tsp_id id;
   tsp_int vehiclesCount = 0;
-  // const tsp_position *points;
 };
 
 struct tsp_road {
