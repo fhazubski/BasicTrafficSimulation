@@ -159,6 +159,26 @@ struct DataNaSchTrafficLightsThree04Speed : DataNaSch {
   }
 };
 
+struct DataNaSchTrafficLightsThree08SpeedA025
+    : DataNaSchTrafficLightsThree08Speed {
+  DataNaSchTrafficLightsThree08SpeedA025() { autonomousCarsPercent = 0.25; }
+};
+
+struct DataNaSchTrafficLightsThree08SpeedA05
+    : DataNaSchTrafficLightsThree08Speed {
+  DataNaSchTrafficLightsThree08SpeedA05() { autonomousCarsPercent = 0.5; }
+};
+
+struct DataNaSchTrafficLightsThree08SpeedA075
+    : DataNaSchTrafficLightsThree08Speed {
+  DataNaSchTrafficLightsThree08SpeedA075() { autonomousCarsPercent = 0.75; }
+};
+
+struct DataNaSchTrafficLightsThree08SpeedA1
+    : DataNaSchTrafficLightsThree08Speed {
+  DataNaSchTrafficLightsThree08SpeedA1() { autonomousCarsPercent = 1; }
+};
+
 struct DataNaSchLikeKnospe : TSP::tsp_simulation_data_nasch {
   DataNaSchLikeKnospe() {
     maxVelocityMps = 30;

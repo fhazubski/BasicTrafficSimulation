@@ -13,6 +13,7 @@ public:
   bool setTime(tsp_float newTime);
   void updateVehicleStatusAndPosition();
   void v2vCommunication();
+  void v2iCommunication();
   bool setP(tsp_float p);
   bool setSpaceLengthM(tsp_float a_spaceLengthM);
   tsp_int getRoadLanesCount();
@@ -41,6 +42,7 @@ private:
   tsp_int maximalAcceleration;
   tsp_int randomDeceleration;
   tsp_int minimalDistance;
+  const tsp_int v2iCommunicationTimeInterval = 500 * milisecond;
   const tsp_int v2vCommunicationTimeInterval = 10 * milisecond;
   const tsp_int timeStep = v2vCommunicationTimeInterval;
   const tsp_int vehiclesStateAndPositionUpdateTimeInterval = second;

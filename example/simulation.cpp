@@ -6,7 +6,12 @@
 
 Simulation::Simulation(QObject *parent) : QObject(parent) {
   DataNaSchTrafficLightsThree08Speed simulationData;
-  simulationData.carDensity = 0.1;
+  simulationData.carDensity = 0.2;
+  simulationData.autonomousCarsPercent = 0;
+  simulationData.trafficLightsData.spacingPercent = 0.8;
+  simulationData.trafficLightsData.trafficLightsCount = 5;
+  simulationData.trafficLightsData.optimalSpeedPercentOfMaxSpeed = 0.8;
+  simulationData.trafficLightsData.redLightDurationPercent = 0.2;
   simulationData.laneLengthM = 200;
   tspInitializeSimulation(simulationData);
   m_roadLanesCount = tspGetRoadLanesCount();

@@ -27,13 +27,6 @@ Window {
         }
     }
 
-    Checkerboard {
-        anchors.fill: parent
-        step: 50
-        color1: "white"
-        color2: "lightgrey"
-    }
-
     SimulationView {
         id: simulationView
         anchors.fill: parent

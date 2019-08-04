@@ -48,6 +48,9 @@ bool Simulation::setTime(tsp_float newTime) {
     if (timeToSet % v2vCommunicationTimeInterval == 0) {
       v2vCommunication();
     }
+    if (timeToSet % v2iCommunicationTimeInterval == 0) {
+      v2iCommunication();
+    }
     if (timeToSet % vehiclesStateAndPositionUpdateTimeInterval == 0) {
       updateVehicleStatusAndPosition();
     }
@@ -57,6 +60,18 @@ bool Simulation::setTime(tsp_float newTime) {
 }
 
 void Simulation::updateVehicleStatusAndPosition() {
+  for (auto &roadLane : roadLanes) {
+    for (auto point : roadLane.pointsWithTrafficLights) {
+      point->timeToNextState -= second;
+      if (point->timeToNextState <= 0) {
+        point->isTrafficLightRed = !point->isTrafficLightRed;
+        point->timeToNextState +=
+            (point->isTrafficLightRed ? point->redLightDurationS
+                                      : point->greenLightDurationS);
+      }
+    }
+  }
+
   for (auto &vehicle : vehicles) {
     vehicle.newVelocity = getNewVelocity(vehicle);
 
@@ -85,18 +100,6 @@ void Simulation::updateVehicleStatusAndPosition() {
       roadLanes[vehicle.lane].points[vehicle.position].vehicle = vehicle.id;
     }
   }
-
-  for (auto &roadLane : roadLanes) {
-    for (auto point : roadLane.pointsWithTrafficLights) {
-      point->timeToNextState -= second;
-      if (point->timeToNextState <= 0) {
-        point->isTrafficLightRed = !point->isTrafficLightRed;
-        point->timeToNextState +=
-            (point->isTrafficLightRed ? point->redLightDurationS
-                                      : point->greenLightDurationS);
-      }
-    }
-  }
 }
 void Simulation::v2vCommunication() {
   for (auto &vehicle : vehicles) {
@@ -114,6 +117,70 @@ void Simulation::v2vCommunication() {
   }
 }
 
+void Simulation::v2iCommunication() {
+  for (auto &vehicle : vehicles) {
+    if (!vehicle.isAutonomous) {
+      continue;
+    }
+    tsp_int distanceToNextLight = roadLanes[vehicle.lane].pointsCount;
+    tsp_lane_point *nextLight = nullptr;
+    for (auto light : roadLanes[vehicle.lane].pointsWithTrafficLights) {
+      if (vehicle.position == light->position) {
+        continue;
+      }
+      tsp_int d = light->position - vehicle.position;
+      if (d < 0) {
+        d += roadLanes[vehicle.lane].pointsCount;
+      }
+      // TODO make adjustable and use real life value
+      if (d * spaceLengthM > 200) {
+        continue;
+      }
+      if (d < distanceToNextLight) {
+        nextLight = light;
+        distanceToNextLight = d;
+      }
+    }
+    if (nextLight == nullptr) {
+      vehicle.greenWaveVelocity = roadLanes[vehicle.lane].maxVelocity;
+      continue;
+    }
+
+    tsp_int timeToCrossLightWithOptimalVelocity =
+        (distanceToNextLight + nextLight->optimalVelocity +
+         maximalAcceleration - 1) /
+        (nextLight->optimalVelocity + maximalAcceleration);
+    tsp_int timeInfluencingLightState =
+        timeToCrossLightWithOptimalVelocity %
+        ((nextLight->redLightDurationS + nextLight->greenLightDurationS) /
+         second);
+    bool isLightRedOnArrival = nextLight->isTrafficLightRed;
+    tsp_int timeToNextLightState = nextLight->timeToNextState / second;
+    while (timeToNextLightState <= timeInfluencingLightState) {
+      isLightRedOnArrival = !isLightRedOnArrival;
+      timeInfluencingLightState -= timeToNextLightState;
+      timeToNextLightState =
+          (isLightRedOnArrival ? nextLight->redLightDurationS
+                               : nextLight->greenLightDurationS) /
+          second;
+    }
+    if (!isLightRedOnArrival) {
+      vehicle.greenWaveVelocity =
+          nextLight->optimalVelocity + maximalAcceleration;
+      continue;
+    }
+
+    tsp_int additionalTimeNeededToCrossGreen =
+        nextLight->redLightDurationS / second - timeInfluencingLightState;
+    tsp_float recommendedVelocity =
+        static_cast<tsp_float>(distanceToNextLight) /
+        static_cast<tsp_float>(timeToCrossLightWithOptimalVelocity +
+                               additionalTimeNeededToCrossGreen);
+    vehicle.greenWaveVelocity =
+        static_cast<tsp_int>(std::floor(recommendedVelocity));
+  }
+}
+
 void Simulation::initialize(tsp_float newVehicleVelocityMps,
                             tsp_float accelerationMps,
                             tsp_float randomDecelerationMps,
@@ -128,7 +195,9 @@ void Simulation::initialize(tsp_float newVehicleVelocityMps,
   tsp_int carsToSpawnCount = static_cast<tsp_int>(
       static_cast<tsp_float>(roadLanes[0].pointsCount / minimalDistance) *
       carDensity);
+#ifndef NDEBUG
   std::cout << "TSP: vehicles to spawn " << carsToSpawnCount << std::endl;
+#endif
   tsp_int autonomousCarsToSpawnCount = static_cast<tsp_int>(std::round(
       static_cast<tsp_float>(carsToSpawnCount) * autonomousCarsPercent));
   tsp_int carsLeftToSpawn = carsToSpawnCount;
@@ -249,6 +318,9 @@ bool Simulation::setSpaceLengthM(tsp_float a_spaceLengthM) {
 }
 
 tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle &vehicle) {
+  if (vehicle.nextVehicle == vehicle.id) {
+    return roadLanes[vehicle.lane].maxVelocity + minimalDistance;
+  }
   tsp_int d = vehicles[vehicle.nextVehicle - 1].position - vehicle.position;
   if (d < 0) {
     d += roadLanes[vehicle.lane].pointsCount;
@@ -285,7 +357,14 @@ tsp_int Simulation::getNewVelocity(tsp_vehicle &vehicle) {
 
   distance = distanceToTheNearestRedTrafficLight(vehicle);
 
-  return std::min(newVelocity, distance - 1);
+  if (distance - 1 < newVelocity) {
+    newVelocity = distance - 1;
+  }
+
+  if (vehicle.isAutonomous) {
+    return std::min(newVelocity, vehicle.greenWaveVelocity);
+  }
+  return newVelocity;
 
   // If the next vehicle moving more slowly, adjust velocity to prevent sudden
   // velocity changes

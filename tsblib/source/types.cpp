@@ -79,33 +79,46 @@ void initializeNotRandomizedTrafficLights(
                std::min(static_cast<tsp_float>(maxVelocity), optimalVelocity));
   tsp_int timeOffset = static_cast<tsp_int>(std::round(
       static_cast<tsp_float>(positionOffset * second) / optimalVelocity));
+#ifndef NDEBUG
   std::cout << "TSP: lights offset: " << positionOffset
             << ", time offset: " << timeOffset << ", max V: " << maxVelocity
             << ", optimal V: " << optimalVelocity << ", optimal V percent: "
             << trafficLightsData.optimalSpeedPercentOfMaxSpeed << std::endl;
+#endif
 
   tsp_int currentPosition = HelperMath::getRandomInt(0, lane.points.size() - 1);
-  tsp_float fullLapTime = std::round(
-      static_cast<tsp_float>(lane.points.size() * second) / optimalVelocity);
-  tsp_int redLightDuration = static_cast<tsp_int>(
-      fullLapTime * trafficLightsData.redLightDurationPercent);
+  tsp_float fullLapTime =
+      std::round(static_cast<tsp_float>(lane.points.size()) / optimalVelocity) *
+      second;
+  tsp_int redLightDuration =
+      static_cast<tsp_int>(
+          std::round(fullLapTime * trafficLightsData.redLightDurationPercent /
+                     static_cast<tsp_float>(second))) *
+      second;
   tsp_int greenLightDuration =
       static_cast<tsp_int>(fullLapTime) - redLightDuration;
   tsp_int trafficLightsToCreate = trafficLightsData.trafficLightsCount;
   tsp_int currentTime = (trafficLightsToCreate + 1) * timeOffset;
 
+#ifndef NDEBUG
   std::cout << "TSP: green light time: " << greenLightDuration
             << ", red light: " << redLightDuration << std::endl;
+#endif
 
   lane.pointsWithTrafficLights.resize(trafficLightsToCreate);
   while (trafficLightsToCreate--) {
+    tsp_int currentTimeFullSecond =
+        static_cast<tsp_int>(static_cast<tsp_float>(currentTime) /
+                             static_cast<tsp_float>(second)) *
+        second;
     auto &point = lane.points[currentPosition % lane.points.size()];
 
     point.hasTrafficLight = true;
     point.greenLightDurationS = greenLightDuration;
     point.redLightDurationS = redLightDuration;
+    point.optimalVelocity = static_cast<tsp_int>(std::round(optimalVelocity));
     tsp_int timeSinceGreenLightStart =
-        currentTime % (greenLightDuration + redLightDuration);
+        currentTimeFullSecond % (greenLightDuration + redLightDuration);
     point.isTrafficLightRed = (timeSinceGreenLightStart >= greenLightDuration);
     if (point.isTrafficLightRed) {
       point.timeToNextState =
@@ -133,6 +146,7 @@ tsp_road_lane::tsp_road_lane(
     points[i].hasTrafficLight = false;
   }
 
+#ifndef NDEBUG
   std::cout << "TSP: traffic lights data: " << trafficLightsData
             << ", lights randomized: "
             << (trafficLightsData != nullptr
@@ -143,6 +157,7 @@ tsp_road_lane::tsp_road_lane(
                     ? trafficLightsData->trafficLightsCount
                     : -1)
             << std::endl;
+#endif
 
   if (trafficLightsData != nullptr) {
     if (trafficLightsData->useRandomizedInputs) {

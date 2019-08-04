@@ -53,6 +53,7 @@ struct tsp_lane_point {
   tsp_int greenLightDurationS;
   tsp_int redLightDurationS;
   tsp_int timeToNextState;
+  tsp_int optimalVelocity;
 };
 
 struct tsp_road_lane {
@@ -117,6 +118,7 @@ struct tsp_vehicle {
   tsp_int position;
   tsp_int velocity;
   tsp_int newVelocity;
+  tsp_int greenWaveVelocity;
   tsp_id id;
   tsp_id nextVehicle = 0;
   tsp_id previousVehicle = 0;

@@ -11,7 +11,7 @@
 #include <fstream>
 #include <iostream>
 
-#define SIMULATE_AND_SAVE_TO_FILE 1
+#define SIMULATE_AND_SAVE_TO_FILE 0
 #define SIMULATE_QUICK 0
 #define SIMULATE_KNOSPE 0
 
@@ -75,6 +75,15 @@ int main(int argc, char *argv[]) {
     simulateAndSave("DataNaSch.csv", DataNaSch());
     simulateAndSave("DataNaSchTrafficLightsP001.csv",
                     DataNaSchTrafficLightsP001());
+    simulateAndSave("DataNaSchTrafficLightsThree08SpeedA025.csv",
+                    DataNaSchTrafficLightsThree08SpeedA025());
+    simulateAndSave("DataNaSchTrafficLightsThree08SpeedA05.csv",
+                    DataNaSchTrafficLightsThree08SpeedA05());
+    simulateAndSave("DataNaSchTrafficLightsThree08SpeedA075.csv",
+                    DataNaSchTrafficLightsThree08SpeedA075());
+    simulateAndSave("DataNaSchTrafficLightsThree08SpeedA1.csv",
+                    DataNaSchTrafficLightsThree08SpeedA1());
+    /*
     simulateAndSave("DataNaSchTrafficLightsP002.csv",
                     DataNaSchTrafficLightsP002());
 
@@ -91,7 +100,7 @@ int main(int argc, char *argv[]) {
     simulateAndSave("DataNaSchTrafficLightsTwenty08Speed.csv",
                     DataNaSchTrafficLightsTwenty08Speed());
     simulateAndSave("DataNaSchTrafficLightsThree04Speed.csv",
-                    DataNaSchTrafficLightsThree04Speed());
+                    DataNaSchTrafficLightsThree04Speed());*/
 
     return 0;
   }
