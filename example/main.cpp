@@ -26,8 +26,8 @@ template <typename T> void simulateAndSave(const char *filename, T data) {
   std::ofstream outCsv;
   outCsv.open(filename);
   std::vector<TSP::tsp_simulation_result> results;
-  for (TSP::tsp_float d = 0.8; d >= 0.01; d -= (SIMULATE_QUICK ? 0.05 : 0.01)) {
-    // std::cout << "progress: " << d << std::endl;
+  for (TSP::tsp_float d = 0.88; d >= 0.01;
+       d -= (SIMULATE_QUICK ? 0.05 : 0.01)) {
     data.carDensity = d;
     for (int n = 0; n < (SIMULATE_QUICK ? 10 : 10); n++) {
       tspInitializeSimulation(data);
@@ -52,55 +52,85 @@ int main(int argc, char *argv[]) {
   QQmlApplicationEngine engine;
 
   if (SIMULATE_AND_SAVE_TO_FILE) {
-    /*simulateAndSave("NaSchP01.csv", DataNaSch());
-    simulateAndSave("NaSchP05.csv", DataNaSchP05());
-    simulateAndSave("NaSchLikeKnospe.csv", DataNaSchLikeKnospe());
-    simulateAndSave("KnospeWithoutLaneChanging.csv",
-                    DataKnospeWithoutLaneChanging());*/
-    /*simulateAndSave("NaSchP0.csv", DataNaSchP0());
-    simulateAndSave("Knospe.csv", DataKnospe());
-    simulateAndSave("KnospeWithoutRandomizedBreaking.csv",
-                    DataKnospeWithoutRandomizedBreaking());*/
-    /*
-    simulateAndSave("NaSchP03Auto0.csv", DataNaSchP03Auto0());
-    simulateAndSave("NaSchP03Auto025.csv", DataNaSchP03Auto025());
-    simulateAndSave("NaSchP03Auto05.csv", DataNaSchP03Auto05());
-    simulateAndSave("NaSchP03Auto075.csv", DataNaSchP03Auto075());
-    simulateAndSave("NaSchP03Auto1.csv", DataNaSchP03Auto1());
-    simulateAndSave("NaSchP03.csv", DataNaSchP03Auto0());
-    simulateAndSave("NaSchP0225.csv", DataNaSchP0225());
-    simulateAndSave("NaSchP015.csv", DataNaSchP015());
-    simulateAndSave("NaSchP0075.csv", DataNaSchP0075());
-    simulateAndSave("NaSchP0.csv", DataNaSchP0());*/
-    simulateAndSave("DataNaSch.csv", DataNaSch());
-    simulateAndSave("DataNaSchTrafficLightsP001.csv",
-                    DataNaSchTrafficLightsP001());
-    simulateAndSave("DataNaSchTrafficLightsThree08SpeedA025.csv",
-                    DataNaSchTrafficLightsThree08SpeedA025());
-    simulateAndSave("DataNaSchTrafficLightsThree08SpeedA05.csv",
-                    DataNaSchTrafficLightsThree08SpeedA05());
-    simulateAndSave("DataNaSchTrafficLightsThree08SpeedA075.csv",
-                    DataNaSchTrafficLightsThree08SpeedA075());
-    simulateAndSave("DataNaSchTrafficLightsThree08SpeedA1.csv",
-                    DataNaSchTrafficLightsThree08SpeedA1());
-    /*
-    simulateAndSave("DataNaSchTrafficLightsP002.csv",
-                    DataNaSchTrafficLightsP002());
+    /* NaSch default, compare p - velocity decrease probability parameter */
+    //    simulateAndSave("DataNaSchP0.csv", DataNaSchP0());
+    //    simulateAndSave("DataNaSchP005.csv", DataNaSchP005());
+    //    simulateAndSave("DataNaSchP01.csv", DataNaSchP01());
+    //    simulateAndSave("DataNaSchP02.csv", DataNaSchP02());
+    //    simulateAndSave("DataNaSchP03.csv", DataNaSchP03());
+    //    simulateAndSave("DataNaSchP04.csv", DataNaSchP04());
+    //    simulateAndSave("DataNaSchP05.csv", DataNaSchP05());
 
-    simulateAndSave("DataNaSchTrafficLightsOneFullSpeed.csv",
-                    DataNaSchTrafficLightsOneFullSpeed());
-    simulateAndSave("DataNaSchTrafficLightsThreeFullSpeed.csv",
-                    DataNaSchTrafficLightsThreeFullSpeed());
-    simulateAndSave("DataNaSchTrafficLightsTwentyFullSpeed.csv",
-                    DataNaSchTrafficLightsTwentyFullSpeed());
-    simulateAndSave("DataNaSchTrafficLightsOne08Speed.csv",
-                    DataNaSchTrafficLightsOne08Speed());
-    simulateAndSave("DataNaSchTrafficLightsThree08Speed.csv",
-                    DataNaSchTrafficLightsThree08Speed());
-    simulateAndSave("DataNaSchTrafficLightsTwenty08Speed.csv",
-                    DataNaSchTrafficLightsTwenty08Speed());
-    simulateAndSave("DataNaSchTrafficLightsThree04Speed.csv",
-                    DataNaSchTrafficLightsThree04Speed());*/
+    /* NaSch - Knospe comparison */
+    //    simulateAndSave("DataNaSch.csv", DataNaSch());
+    //    simulateAndSave("DataNaSchLikeKnospe.csv", DataNaSchLikeKnospe());
+    //    simulateAndSave("DataKnospe.csv", DataKnospe());
+    //    simulateAndSave("DataKnospeSingleLane.csv", DataKnospeSingleLane());
+    //    simulateAndSave("DataKnospeWithoutLaneChanging.csv",
+    //                    DataKnospeWithoutLaneChanging());
+    //    simulateAndSave("KnospeWithoutRandomizedBreaking.csv",
+    //                    DataKnospeWithoutRandomizedBreaking());
+
+    /* NaSch with randomized traffic lights */
+    simulateAndSave("DataNaSch.csv", DataNaSch());
+    simulateAndSave("DataNaSchTrafficLightsRandomL1.csv",
+                    DataNaSchTrafficLightsRandomL1());
+    simulateAndSave("DataNaSchTrafficLightsRandomL2.csv",
+                    DataNaSchTrafficLightsRandomL2());
+    simulateAndSave("DataNaSchTrafficLightsRandomSameDurationL2.csv",
+                    DataNaSchTrafficLightsRandomSameDurationL2());
+
+    /* NaSch with not randomized traffic lights - lights count comparison */
+    //    simulateAndSave("DataNaSch.csv", DataNaSch());
+    //    simulateAndSave("DataNaSchTrafficLightsOneFullSpeed.csv",
+    //                    DataNaSchTrafficLightsOneFullSpeed());
+    //    simulateAndSave("DataNaSchTrafficLightsThreeFullSpeed.csv",
+    //                    DataNaSchTrafficLightsThreeFullSpeed());
+    //    simulateAndSave("DataNaSchTrafficLightsTwentyFullSpeed.csv",
+    //                    DataNaSchTrafficLightsTwentyFullSpeed());
+
+    /* NaSch with not randomized traffic lights - optimal speed comparison */
+    //    simulateAndSave("DataNaSch.csv", DataNaSch());
+    //    simulateAndSave("DataNaSchTrafficLightsThreeFullSpeed.csv",
+    //                    DataNaSchTrafficLightsThreeFullSpeed());
+    //    simulateAndSave("DataNaSchTrafficLightsThree08Speed.csv",
+    //                    DataNaSchTrafficLightsThree08Speed());
+    //    simulateAndSave("DataNaSchTrafficLightsThree06Speed.csv",
+    //                    DataNaSchTrafficLightsThree06Speed());
+    //    simulateAndSave("DataNaSchTrafficLightsThree04Speed.csv",
+    //                    DataNaSchTrafficLightsThree04Speed());
+
+    /* NaSch with traffic lights and autonomous vehicles comparison */
+    //    simulateAndSave("DataNaSchTrafficLightsThree08Speed.csv",
+    //                    DataNaSchTrafficLightsThree08Speed());
+    //    simulateAndSave("DataNaSchTrafficLightsThree08SpeedA025.csv",
+    //                    DataNaSchTrafficLightsThree08SpeedA025());
+    //    simulateAndSave("DataNaSchTrafficLightsThree08SpeedA05.csv",
+    //                    DataNaSchTrafficLightsThree08SpeedA05());
+    //    simulateAndSave("DataNaSchTrafficLightsThree08SpeedA075.csv",
+    //                    DataNaSchTrafficLightsThree08SpeedA075());
+    //    simulateAndSave("DataNaSchTrafficLightsThree08SpeedA1.csv",
+    //                    DataNaSchTrafficLightsThree08SpeedA1());
+    //    simulateAndSave("DataNaSchTrafficLightsThree06Speed.csv",
+    //                    DataNaSchTrafficLightsThree06Speed());
+    //    simulateAndSave("DataNaSchTrafficLightsThree06SpeedA025.csv",
+    //                    DataNaSchTrafficLightsThree06SpeedA025());
+    //    simulateAndSave("DataNaSchTrafficLightsThree06SpeedA05.csv",
+    //                    DataNaSchTrafficLightsThree06SpeedA05());
+    //    simulateAndSave("DataNaSchTrafficLightsThree06SpeedA075.csv",
+    //                    DataNaSchTrafficLightsThree06SpeedA075());
+    //    simulateAndSave("DataNaSchTrafficLightsThree06SpeedA1.csv",
+    //                    DataNaSchTrafficLightsThree06SpeedA1());
+    //    simulateAndSave("DataNaSchTrafficLightsThree04Speed.csv",
+    //                    DataNaSchTrafficLightsThree04Speed());
+    //    simulateAndSave("DataNaSchTrafficLightsThree04SpeedA025.csv",
+    //                    DataNaSchTrafficLightsThree04SpeedA025());
+    //    simulateAndSave("DataNaSchTrafficLightsThree04SpeedA05.csv",
+    //                    DataNaSchTrafficLightsThree04SpeedA05());
+    //    simulateAndSave("DataNaSchTrafficLightsThree04SpeedA075.csv",
+    //                    DataNaSchTrafficLightsThree04SpeedA075());
+    //    simulateAndSave("DataNaSchTrafficLightsThree04SpeedA1.csv",
+    //                    DataNaSchTrafficLightsThree04SpeedA1());
 
     return 0;
   }

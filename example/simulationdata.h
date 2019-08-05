@@ -15,15 +15,11 @@ struct TrafficLightsRandomized : TSP::tsp_traffic_lights_data {
   TrafficLightsRandomized() {
     useRandomizedInputs = true;
     trafficLightsPercent = 0.01;
-    minimalRedLightDurationS = 60;
+    minimalRedLightDurationS = 30;
     maximalRedLightDurationS = 60;
     minimalGreenLightDurationS = 60;
-    maximalGreenLightDurationS = 60;
+    maximalGreenLightDurationS = 120;
   }
-};
-
-struct MoreTrafficLightsRandomized : TrafficLightsRandomized {
-  MoreTrafficLightsRandomized() { trafficLightsPercent = 0.02; }
 };
 
 struct TrafficLightsSingleFullSpeedNotRandomized
@@ -34,13 +30,6 @@ struct TrafficLightsSingleFullSpeedNotRandomized
     spacingPercent = 0.5;
     optimalSpeedPercentOfMaxSpeed = 1.0;
     redLightDurationPercent = 1.0 / 3.0;
-  }
-};
-
-struct TrafficLightsSingle08SpeedNotRandomized
-    : TrafficLightsSingleFullSpeedNotRandomized {
-  TrafficLightsSingle08SpeedNotRandomized() {
-    optimalSpeedPercentOfMaxSpeed = 0.8;
   }
 };
 
@@ -59,55 +48,55 @@ struct DataNaSch : TSP::tsp_simulation_data_nasch {
   }
 };
 
-struct DataNaSchP03Auto0 : DataNaSch {
-  DataNaSchP03Auto0() { velocityDecreaseProbability = 0.3; }
+struct DataNaSchP0 : DataNaSch {
+  DataNaSchP0() { velocityDecreaseProbability = 0; }
 };
 
-struct DataNaSchP03Auto025 : DataNaSchP03Auto0 {
-  DataNaSchP03Auto025() { autonomousCarsPercent = 0.25; }
+struct DataNaSchP005 : DataNaSch {
+  DataNaSchP005() { velocityDecreaseProbability = 0.05; }
 };
 
-struct DataNaSchP03Auto05 : DataNaSchP03Auto0 {
-  DataNaSchP03Auto05() { autonomousCarsPercent = 0.5; }
+struct DataNaSchP01 : DataNaSch {
+  DataNaSchP01() { velocityDecreaseProbability = 0.1; }
 };
 
-struct DataNaSchP03Auto075 : DataNaSchP03Auto0 {
-  DataNaSchP03Auto075() { autonomousCarsPercent = 0.75; }
+struct DataNaSchP02 : DataNaSch {
+  DataNaSchP02() { velocityDecreaseProbability = 0.2; }
 };
 
-struct DataNaSchP03Auto1 : DataNaSchP03Auto0 {
-  DataNaSchP03Auto1() { autonomousCarsPercent = 1; }
+struct DataNaSchP03 : DataNaSch {
+  DataNaSchP03() { velocityDecreaseProbability = 0.3; }
 };
 
-struct DataNaSchP0225 : DataNaSch {
-  DataNaSchP0225() { velocityDecreaseProbability = 0.225; }
-};
-
-struct DataNaSchP015 : DataNaSch {
-  DataNaSchP015() { velocityDecreaseProbability = 0.15; }
-};
-
-struct DataNaSchP0075 : DataNaSch {
-  DataNaSchP0075() { velocityDecreaseProbability = 0.075; }
+struct DataNaSchP04 : DataNaSch {
+  DataNaSchP04() { velocityDecreaseProbability = 0.4; }
 };
 
 struct DataNaSchP05 : DataNaSch {
   DataNaSchP05() { velocityDecreaseProbability = 0.5; }
 };
 
-struct DataNaSchP0 : DataNaSch {
-  DataNaSchP0() { velocityDecreaseProbability = 0; }
-};
-
-struct DataNaSchTrafficLightsP001 : DataNaSch {
-  DataNaSchTrafficLightsP001() {
+struct DataNaSchTrafficLightsRandomL1 : DataNaSch {
+  DataNaSchTrafficLightsRandomL1() {
     trafficLightsData = TrafficLightsRandomized();
   }
 };
 
-struct DataNaSchTrafficLightsP002 : DataNaSch {
-  DataNaSchTrafficLightsP002() {
-    trafficLightsData = MoreTrafficLightsRandomized();
+struct DataNaSchTrafficLightsRandomL2 : DataNaSch {
+  DataNaSchTrafficLightsRandomL2() {
+    trafficLightsData = TrafficLightsRandomized();
+    trafficLightsData.trafficLightsPercent = 0.02;
+  }
+};
+
+struct DataNaSchTrafficLightsRandomSameDurationL2 : DataNaSch {
+  DataNaSchTrafficLightsRandomSameDurationL2() {
+    trafficLightsData = TrafficLightsRandomized();
+    trafficLightsData.trafficLightsPercent = 0.02;
+    trafficLightsData.minimalRedLightDurationS = 60;
+    trafficLightsData.maximalRedLightDurationS = 60;
+    trafficLightsData.minimalGreenLightDurationS = 60;
+    trafficLightsData.maximalGreenLightDurationS = 60;
   }
 };
 
@@ -131,31 +120,27 @@ struct DataNaSchTrafficLightsTwentyFullSpeed : DataNaSch {
   }
 };
 
-struct DataNaSchTrafficLightsOne08Speed : DataNaSch {
-  DataNaSchTrafficLightsOne08Speed() {
-    trafficLightsData = TrafficLightsSingle08SpeedNotRandomized();
-  }
-};
-
 struct DataNaSchTrafficLightsThree08Speed : DataNaSch {
   DataNaSchTrafficLightsThree08Speed() {
-    trafficLightsData = TrafficLightsSingle08SpeedNotRandomized();
+    trafficLightsData = TrafficLightsSingleFullSpeedNotRandomized();
     trafficLightsData.trafficLightsCount = 3;
+    trafficLightsData.optimalSpeedPercentOfMaxSpeed = 0.8;
   }
 };
 
-struct DataNaSchTrafficLightsTwenty08Speed : DataNaSch {
-  DataNaSchTrafficLightsTwenty08Speed() {
-    trafficLightsData = TrafficLightsSingle08SpeedNotRandomized();
-    trafficLightsData.trafficLightsCount = 20;
+struct DataNaSchTrafficLightsThree06Speed : DataNaSch {
+  DataNaSchTrafficLightsThree06Speed() {
+    trafficLightsData = TrafficLightsSingleFullSpeedNotRandomized();
+    trafficLightsData.trafficLightsCount = 3;
+    trafficLightsData.optimalSpeedPercentOfMaxSpeed = 0.6;
   }
 };
 
 struct DataNaSchTrafficLightsThree04Speed : DataNaSch {
   DataNaSchTrafficLightsThree04Speed() {
-    trafficLightsData = TrafficLightsSingle08SpeedNotRandomized();
-    trafficLightsData.optimalSpeedPercentOfMaxSpeed = 0.4;
+    trafficLightsData = TrafficLightsSingleFullSpeedNotRandomized();
     trafficLightsData.trafficLightsCount = 3;
+    trafficLightsData.optimalSpeedPercentOfMaxSpeed = 0.4;
   }
 };
 
@@ -177,6 +162,46 @@ struct DataNaSchTrafficLightsThree08SpeedA075
 struct DataNaSchTrafficLightsThree08SpeedA1
     : DataNaSchTrafficLightsThree08Speed {
   DataNaSchTrafficLightsThree08SpeedA1() { autonomousCarsPercent = 1; }
+};
+
+struct DataNaSchTrafficLightsThree06SpeedA025
+    : DataNaSchTrafficLightsThree08Speed {
+  DataNaSchTrafficLightsThree06SpeedA025() { autonomousCarsPercent = 0.25; }
+};
+
+struct DataNaSchTrafficLightsThree06SpeedA05
+    : DataNaSchTrafficLightsThree08Speed {
+  DataNaSchTrafficLightsThree06SpeedA05() { autonomousCarsPercent = 0.5; }
+};
+
+struct DataNaSchTrafficLightsThree06SpeedA075
+    : DataNaSchTrafficLightsThree08Speed {
+  DataNaSchTrafficLightsThree06SpeedA075() { autonomousCarsPercent = 0.75; }
+};
+
+struct DataNaSchTrafficLightsThree06SpeedA1
+    : DataNaSchTrafficLightsThree08Speed {
+  DataNaSchTrafficLightsThree06SpeedA1() { autonomousCarsPercent = 1; }
+};
+
+struct DataNaSchTrafficLightsThree04SpeedA025
+    : DataNaSchTrafficLightsThree08Speed {
+  DataNaSchTrafficLightsThree04SpeedA025() { autonomousCarsPercent = 0.25; }
+};
+
+struct DataNaSchTrafficLightsThree04SpeedA05
+    : DataNaSchTrafficLightsThree08Speed {
+  DataNaSchTrafficLightsThree04SpeedA05() { autonomousCarsPercent = 0.5; }
+};
+
+struct DataNaSchTrafficLightsThree04SpeedA075
+    : DataNaSchTrafficLightsThree08Speed {
+  DataNaSchTrafficLightsThree04SpeedA075() { autonomousCarsPercent = 0.75; }
+};
+
+struct DataNaSchTrafficLightsThree04SpeedA1
+    : DataNaSchTrafficLightsThree08Speed {
+  DataNaSchTrafficLightsThree04SpeedA1() { autonomousCarsPercent = 1; }
 };
 
 struct DataNaSchLikeKnospe : TSP::tsp_simulation_data_nasch {
@@ -210,6 +235,10 @@ struct DataKnospe : TSP::tsp_simulation_data_knospe {
     laneLengthM = 1000;
     allowLaneChanging = true;
   }
+};
+
+struct DataKnospeSingleLane : DataKnospe {
+  DataKnospeSingleLane() { laneCount = 1; }
 };
 
 struct DataKnospeWithoutLaneChanging : DataKnospe {
