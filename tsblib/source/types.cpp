@@ -47,9 +47,9 @@ void initializeRandomizedTrafficLights(
           second;
 
       point.isTrafficLightRed = HelperMath::getRandomInt(0, 1);
-      point.timeToNextState =
-          (point.isTrafficLightRed ? point.redLightDurationS
-                                   : point.greenLightDurationS);
+      point.timeToNextState = HelperMath::getRandomInt(
+          1, (point.isTrafficLightRed ? point.redLightDurationS
+                                      : point.greenLightDurationS));
 
       trafficLightsToCreate--;
       lane.pointsWithTrafficLights[trafficLightsToCreate] = &point;
