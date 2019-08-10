@@ -1,4 +1,5 @@
 #include "include/tslib/api.h"
+#include <iostream>
 
 int main() {
   int repeats = 20;
@@ -81,13 +82,13 @@ int main() {
 
     simulationData.carDensity = 0.015;
     tspInitializeSimulation(simulationData);
-    tspGatherResults(10000);
+    tspGatherResults(1000);
     simulationData.carDensity = 0.010;
     tspInitializeSimulation(simulationData);
-    tspGatherResults(10000);
+    tspGatherResults(1000);
     simulationData.carDensity = 0.005;
     tspInitializeSimulation(simulationData);
-    tspGatherResults(10000);
+    tspGatherResults(1000);
   }
   return 0;
 }

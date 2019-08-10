@@ -8,6 +8,7 @@ Simulation::Simulation(QObject *parent) : QObject(parent) {
   DataNaSchTrafficLightsThree08Speed simulationData;
   simulationData.carDensity = 0.2;
   simulationData.autonomousCarsPercent = 0;
+  simulationData.trafficLightsData.enableTrafficLights = true;
   simulationData.trafficLightsData.spacingPercent = 0.8;
   simulationData.trafficLightsData.trafficLightsCount = 5;
   simulationData.trafficLightsData.optimalSpeedPercentOfMaxSpeed = 0.8;
@@ -25,10 +26,12 @@ Simulation::Simulation(QObject *parent) : QObject(parent) {
   m_trafficLightsCount = tspGetTrafficLightsCount();
   m_trafficLightsStates =
       new TSP::tsp_traffic_light_state[m_trafficLightsCount];
+
+  setTime(0);
 }
 
-void Simulation::setTime(qreal time) {
-  tspSetTime(time);
+void Simulation::setTime(qreal timeS) {
+  tspSetTime(timeS);
   if ((m_vehiclesStates != nullptr) && (m_trafficLightsStates != nullptr)) {
     tspGetVehicles(m_vehiclesStates);
     tspGetTrafficLights(m_trafficLightsStates);

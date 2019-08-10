@@ -75,7 +75,12 @@ tsp_int HelperMath::getRandomInt(tsp_int min, tsp_int max) {
   return static_cast<tsp_int>(result) + min - 1;
 }
 
-tsp_int HelperMath::userTimeToSimulationTimeS(tsp_float userTime) {
+tsp_int HelperMath::userTimeToSimulationTime(tsp_float userTime) {
+  return static_cast<tsp_int>(
+      std::round(userTime * static_cast<tsp_float>(second)));
+}
+
+tsp_int HelperMath::userTimeToSimulationTimeFullS(tsp_float userTime) {
   return static_cast<tsp_int>(std::round(userTime)) * second;
 }
 

@@ -11,7 +11,7 @@
 #include <fstream>
 #include <iostream>
 
-#define SIMULATE_AND_SAVE_TO_FILE 0
+#define SIMULATE_AND_SAVE_TO_FILE 1
 #define SIMULATE_QUICK 0
 #define SIMULATE_KNOSPE 0
 
@@ -26,12 +26,11 @@ template <typename T> void simulateAndSave(const char *filename, T data) {
   std::ofstream outCsv;
   outCsv.open(filename);
   std::vector<TSP::tsp_simulation_result> results;
-  for (TSP::tsp_float d = 0.88; d >= 0.01;
-       d -= (SIMULATE_QUICK ? 0.05 : 0.01)) {
+  for (TSP::tsp_float d = 0.8; d >= 0.01; d -= (SIMULATE_QUICK ? 0.05 : 0.01)) {
     data.carDensity = d;
-    for (int n = 0; n < (SIMULATE_QUICK ? 10 : 10); n++) {
+    for (int n = 0; n < (SIMULATE_QUICK ? 3 : 10); n++) {
       tspInitializeSimulation(data);
-      results.push_back(tspGatherResults((SIMULATE_QUICK ? 200 : 1000)));
+      results.push_back(tspGatherResults((SIMULATE_QUICK ? 120 : 1000)));
     }
   }
 
@@ -64,7 +63,8 @@ int main(int argc, char *argv[]) {
     /* NaSch - Knospe comparison */
     //    simulateAndSave("DataNaSch.csv", DataNaSch());
     //    simulateAndSave("DataNaSchLikeKnospe.csv", DataNaSchLikeKnospe());
-    //    simulateAndSave("DataKnospe.csv", DataKnospe());
+    simulateAndSave("DataKnospe.csv", DataKnospe());
+    simulateAndSave("DataKnospeLikeNaSch.csv", DataKnospeLikeNaSch());
     //    simulateAndSave("DataKnospeSingleLane.csv", DataKnospeSingleLane());
     //    simulateAndSave("DataKnospeWithoutLaneChanging.csv",
     //                    DataKnospeWithoutLaneChanging());
@@ -72,13 +72,13 @@ int main(int argc, char *argv[]) {
     //                    DataKnospeWithoutRandomizedBreaking());
 
     /* NaSch with randomized traffic lights */
-    simulateAndSave("DataNaSch.csv", DataNaSch());
-    simulateAndSave("DataNaSchTrafficLightsRandomL1.csv",
-                    DataNaSchTrafficLightsRandomL1());
-    simulateAndSave("DataNaSchTrafficLightsRandomL2.csv",
-                    DataNaSchTrafficLightsRandomL2());
-    simulateAndSave("DataNaSchTrafficLightsRandomSameDurationL2.csv",
-                    DataNaSchTrafficLightsRandomSameDurationL2());
+    //    simulateAndSave("DataNaSch.csv", DataNaSch());
+    //    simulateAndSave("DataNaSchTrafficLightsRandomL1.csv",
+    //                    DataNaSchTrafficLightsRandomL1());
+    //    simulateAndSave("DataNaSchTrafficLightsRandomL2.csv",
+    //                    DataNaSchTrafficLightsRandomL2());
+    //    simulateAndSave("DataNaSchTrafficLightsRandomSameDurationL2.csv",
+    //                    DataNaSchTrafficLightsRandomSameDurationL2());
 
     /* NaSch with not randomized traffic lights - lights count comparison */
     //    simulateAndSave("DataNaSch.csv", DataNaSch());

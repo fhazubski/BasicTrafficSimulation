@@ -30,6 +30,7 @@ struct tsp_obstacle_line {
 };
 
 struct tsp_traffic_lights_data {
+  bool enableTrafficLights = false;
   bool useRandomizedInputs;
   // Luck based inputs, used if useRandomizedInputs = true
   tsp_float trafficLightsPercent;

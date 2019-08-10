@@ -22,7 +22,7 @@ Window {
         property real time: 0
         onTriggered: {
             time += interval
-            simulation.setTime(time)
+            simulation.setTime(time / 1000)
             simulationView.refresh()
         }
     }

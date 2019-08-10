@@ -28,20 +28,20 @@ void initializeRandomizedTrafficLights(
 
       point.greenLightDurationS =
           HelperMath::getRandomInt(
-              HelperMath::userTimeToSimulationTimeS(
+              HelperMath::userTimeToSimulationTimeFullS(
                   trafficLightsData.minimalGreenLightDurationS) /
                   second,
-              HelperMath::userTimeToSimulationTimeS(
+              HelperMath::userTimeToSimulationTimeFullS(
                   trafficLightsData.maximalGreenLightDurationS) /
                   second) *
           second;
 
       point.redLightDurationS =
           HelperMath::getRandomInt(
-              HelperMath::userTimeToSimulationTimeS(
+              HelperMath::userTimeToSimulationTimeFullS(
                   trafficLightsData.minimalRedLightDurationS) /
                   second,
-              HelperMath::userTimeToSimulationTimeS(
+              HelperMath::userTimeToSimulationTimeFullS(
                   trafficLightsData.maximalRedLightDurationS) /
                   second) *
           second;
@@ -159,7 +159,7 @@ tsp_road_lane::tsp_road_lane(
             << std::endl;
 #endif
 
-  if (trafficLightsData != nullptr) {
+  if (trafficLightsData != nullptr && trafficLightsData->enableTrafficLights) {
     if (trafficLightsData->useRandomizedInputs) {
       initializeRandomizedTrafficLights(*this, *trafficLightsData);
     } else {

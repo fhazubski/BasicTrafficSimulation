@@ -18,6 +18,8 @@ set(COMMON_SOURCES
   source/simulation.h
   source/simulation_knospe.cpp
   source/simulation_knospe.h
+  source/simulation_nasch.cpp
+  source/simulation_nasch.h
   source/types.cpp)
 add_library(tslib STATIC ${COMMON_SOURCES})
 add_executable(tests ${COMMON_SOURCES}

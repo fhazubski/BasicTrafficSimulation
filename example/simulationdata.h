@@ -4,15 +4,12 @@
 #include "tslib/types.h"
 
 struct NoTrafficLights : TSP::tsp_traffic_lights_data {
-  NoTrafficLights() {
-    useRandomizedInputs = false;
-    trafficLightsPercent = 0;
-    trafficLightsCount = 0;
-  }
+  NoTrafficLights() { enableTrafficLights = false; }
 };
 
 struct TrafficLightsRandomized : TSP::tsp_traffic_lights_data {
   TrafficLightsRandomized() {
+    enableTrafficLights = true;
     useRandomizedInputs = true;
     trafficLightsPercent = 0.01;
     minimalRedLightDurationS = 30;
@@ -25,6 +22,7 @@ struct TrafficLightsRandomized : TSP::tsp_traffic_lights_data {
 struct TrafficLightsSingleFullSpeedNotRandomized
     : TSP::tsp_traffic_lights_data {
   TrafficLightsSingleFullSpeedNotRandomized() {
+    enableTrafficLights = true;
     useRandomizedInputs = false;
     trafficLightsCount = 1;
     spacingPercent = 0.5;
@@ -215,6 +213,25 @@ struct DataNaSchLikeKnospe : TSP::tsp_simulation_data_nasch {
     spaceLengthM = 1.5;
     laneLengthM = 1000;
     autonomousCarsPercent = 0;
+  }
+};
+
+struct DataKnospeLikeNaSch : TSP::tsp_simulation_data_knospe {
+  DataKnospeLikeNaSch() {
+    maxVelocityMps = 37.5;
+    newVehicleVelocityMps = 37.5;
+    accelerationMps = 7.5;
+    randomDecelerationMps = 7.5;
+    velocityDecreaseProbabilityB = 0.1;
+    velocityDecreaseProbability0 = 0.1;
+    velocityDecreaseProbabilityD = 0.1;
+    safeTimeHeadwayS = 6; //?
+    vehicleOccupiedSpaceM = 7.5;
+    spaceLengthM = 7.5;
+    safetyGapM = 10.5; //?
+    laneCount = 1;
+    laneLengthM = 1000;
+    allowLaneChanging = false;
   }
 };
 

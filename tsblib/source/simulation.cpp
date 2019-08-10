@@ -1,4 +1,5 @@
 #include "source/simulation.h"
+#include "source/globals.h"
 #include "source/helpers/helper_math.h"
 #include <algorithm>
 #include <cassert>
@@ -9,36 +10,45 @@
 namespace TSP {
 
 bool Simulation::addVehicle(tsp_id startLane, tsp_int startPosition,
-                            tsp_int velocity, bool isAutonomous) {
+                            tsp_int velocity, tsp_float safeTimeHeadwayS,
+                            tsp_int safetyGap, bool isAutonomous) {
   if (startLane >= roadLanes.size() ||
-      startPosition >= roadLanes[startLane].pointsCount ||
-      roadLanes[startLane].points[startPosition].vehicle != 0) {
+      startPosition >= roadLanes[startLane]->pointsCount ||
+      roadLanes[startLane]->points[startPosition].vehicle != 0) {
     return false;
   }
 
   tsp_vehicle vehicle;
   vehicle.velocity = velocity;
   vehicle.lane = startLane;
+  vehicle.newLane = startLane;
   vehicle.position = startPosition;
   vehicle.id = static_cast<tsp_id>(vehicles.size() + 1);
+  vehicle.safeTimeHeadwayS = safeTimeHeadwayS;
+  vehicle.safetyGap = safetyGap;
   vehicle.isAutonomous = isAutonomous;
   vehicles.push_back(vehicle);
-  roadLanes[startLane].points[startPosition].vehicle = vehicles.back().id;
+  roadLanes[startLane]->points[startPosition].vehicle = vehicle.id;
+  roadLanes[startLane]->vehiclesCount++;
 
   return true;
 }
 
-tsp_id Simulation::addLane(tsp_float lengthM, tsp_int maxVelocity,
-                           tsp_traffic_lights_data &trafficLightsData) {
+void Simulation::addLane(tsp_float lengthM, tsp_int laneCount,
+                         tsp_int maxVelocity,
+                         tsp_traffic_lights_data &trafficLightsData) {
   tsp_int spacesCount =
       static_cast<tsp_int>(std::round(lengthM / spaceLengthM));
-  tsp_id newLaneId = static_cast<tsp_id>(roadLanes.size());
-  roadLanes.push_back(tsp_road_lane(spacesCount, spaceLengthM, maxVelocity,
-                                    newLaneId, &trafficLightsData));
-  return newLaneId;
+  for (int i = 0; i < laneCount; i++) {
+    tsp_id newLaneId = static_cast<tsp_id>(roadLanes.size());
+    roadLanes.push_back(new tsp_road_lane(
+        spacesCount, spaceLengthM, maxVelocity, newLaneId, &trafficLightsData));
+  }
 }
 
-bool Simulation::setTime(tsp_float newTime) {
+bool Simulation::setTime(tsp_float newTimeS) {
+  tsp_int newTime = HelperMath::userTimeToSimulationTime(newTimeS);
+
   if (newTime <= time) {
     return false;
   }
@@ -59,49 +69,9 @@ bool Simulation::setTime(tsp_float newTime) {
   return true;
 }
 
-void Simulation::updateVehicleStatusAndPosition() {
-  for (auto &roadLane : roadLanes) {
-    for (auto point : roadLane.pointsWithTrafficLights) {
-      point->timeToNextState -= second;
-      if (point->timeToNextState <= 0) {
-        point->isTrafficLightRed = !point->isTrafficLightRed;
-        point->timeToNextState +=
-            (point->isTrafficLightRed ? point->redLightDurationS
-                                      : point->greenLightDurationS);
-      }
-    }
-  }
-
-  for (auto &vehicle : vehicles) {
-    vehicle.newVelocity = getNewVelocity(vehicle);
-
-    auto randomValue = HelperMath::getRandom();
-    if ((!vehicle.isAutonomous) &&
-        (randomValue <= velocityDecreaseProbability)) {
-      if (vehicle.newVelocity > randomDeceleration)
-        vehicle.newVelocity -= randomDeceleration;
-      else if (vehicle.newVelocity > 0)
-        vehicle.newVelocity = 0;
-    }
-  }
-
-  for (auto &vehicle : vehicles) {
-    assert(vehicle.newVelocity <= roadLanes[vehicle.lane].maxVelocity);
-    assert(vehicle.newVelocity >= 0);
-    vehicle.velocity = vehicle.newVelocity;
-    if (vehicle.velocity > 0) {
-      roadLanes[vehicle.lane].points[vehicle.position].vehicle = 0;
-      vehicle.position += vehicle.velocity;
-      vehiclesCoveredDistanceM +=
-          static_cast<tsp_float>(vehicle.velocity) * roadLanes[0].spaceLengthM;
-      if (vehicle.position >= roadLanes[0].pointsCount) {
-        vehicle.position -= roadLanes[0].pointsCount;
-      }
-      roadLanes[vehicle.lane].points[vehicle.position].vehicle = vehicle.id;
-    }
-  }
-}
 void Simulation::v2vCommunication() {
+  // TODO remove
+  /*
   for (auto &vehicle : vehicles) {
     if (!vehicle.isAutonomous) {
       continue;
@@ -115,6 +85,7 @@ void Simulation::v2vCommunication() {
       previousVehicle.velocity = vehicle.velocity;
     }
   }
+  */
 }
 
 void Simulation::v2iCommunication() {
@@ -122,15 +93,15 @@ void Simulation::v2iCommunication() {
     if (!vehicle.isAutonomous) {
       continue;
     }
-    tsp_int distanceToNextLight = roadLanes[vehicle.lane].pointsCount;
+    tsp_int distanceToNextLight = roadLanes[vehicle.lane]->pointsCount;
     tsp_lane_point *nextLight = nullptr;
-    for (auto light : roadLanes[vehicle.lane].pointsWithTrafficLights) {
+    for (auto light : roadLanes[vehicle.lane]->pointsWithTrafficLights) {
       if (vehicle.position == light->position) {
         continue;
       }
       tsp_int d = light->position - vehicle.position;
       if (d < 0) {
-        d += roadLanes[vehicle.lane].pointsCount;
+        d += roadLanes[vehicle.lane]->pointsCount;
       }
       // TODO make adjustable and use real life value
       if (d * spaceLengthM > 200) {
@@ -142,7 +113,7 @@ void Simulation::v2iCommunication() {
       }
     }
     if (nextLight == nullptr) {
-      vehicle.greenWaveVelocity = roadLanes[vehicle.lane].maxVelocity;
+      vehicle.greenWaveVelocity = roadLanes[vehicle.lane]->maxVelocity;
       continue;
     }
 
@@ -181,126 +152,6 @@ void Simulation::v2iCommunication() {
   }
 }
 
-void Simulation::initialize(tsp_float newVehicleVelocityMps,
-                            tsp_float accelerationMps,
-                            tsp_float randomDecelerationMps,
-                            tsp_float vehicleOccupiedSpaceM,
-                            tsp_float carDensity,
-                            tsp_float autonomousCarsPercent) {
-  minimalDistance =
-      static_cast<tsp_int>(std::ceil(vehicleOccupiedSpaceM / spaceLengthM));
-  if (minimalDistance < 1) {
-    minimalDistance = 1;
-  }
-  tsp_int carsToSpawnCount = static_cast<tsp_int>(
-      static_cast<tsp_float>(roadLanes[0].pointsCount / minimalDistance) *
-      carDensity);
-#ifndef NDEBUG
-  std::cout << "TSP: vehicles to spawn " << carsToSpawnCount << std::endl;
-#endif
-  tsp_int autonomousCarsToSpawnCount = static_cast<tsp_int>(std::round(
-      static_cast<tsp_float>(carsToSpawnCount) * autonomousCarsPercent));
-  tsp_int carsLeftToSpawn = carsToSpawnCount;
-  std::vector<tsp_int> positions(carsLeftToSpawn);
-  while (carsLeftToSpawn > 0) {
-    tsp_int realSpacesCount = roadLanes[0].pointsCount / minimalDistance;
-    tsp_int newPosition =
-        static_cast<tsp_int>(std::ceil(static_cast<tsp_float>(realSpacesCount) *
-                                       HelperMath::getRandom())) -
-        1;
-    newPosition *= minimalDistance;
-    tsp_int newVelocity =
-        static_cast<tsp_int>(newVehicleVelocityMps / spaceLengthM);
-    bool isAutonomous = (carsLeftToSpawn <= autonomousCarsToSpawnCount);
-    if (addVehicle(0, newPosition, newVelocity, isAutonomous)) {
-      carsLeftToSpawn--;
-      positions[carsLeftToSpawn] = newPosition;
-    }
-  }
-  std::sort(positions.begin(), positions.end());
-  positions.push_back(positions[0]);
-  for (size_t i = 0; i < positions.size() - 1; i++) {
-    tsp_vehicle &previousVehicle =
-        vehicles[roadLanes[0].points[positions[i]].vehicle - 1];
-    tsp_vehicle &nextVehicle =
-        vehicles[roadLanes[0].points[positions[i + 1]].vehicle - 1];
-    previousVehicle.nextVehicle = nextVehicle.id;
-    nextVehicle.previousVehicle = previousVehicle.id;
-  }
-
-  maximalAcceleration =
-      static_cast<tsp_int>(std::round(accelerationMps / spaceLengthM));
-  randomDeceleration =
-      static_cast<tsp_int>(std::round(randomDecelerationMps / spaceLengthM));
-}
-
-tsp_simulation_result Simulation::gatherResults(tsp_float simulationDurationS) {
-  setTime(simulationDurationS * second);
-  tsp_simulation_result results;
-  if (vehicles.size() == 0) {
-    results.vehiclesPerTime = 0;
-  } else {
-    results.vehiclesPerTime =
-        vehiclesCoveredDistanceM /
-        (static_cast<tsp_float>(roadLanes[0].pointsCount) * spaceLengthM) *
-        1000.0 / simulationDurationS;
-  }
-  results.vehiclesDensity =
-      static_cast<tsp_float>(vehicles.size() * minimalDistance) /
-      static_cast<tsp_float>(roadLanes[0].pointsCount);
-  return results;
-}
-
-void Simulation::clear() {
-  time = 0;
-  spaceLengthM = 1.0;
-  velocityDecreaseProbability = 0;
-  vehiclesCoveredDistanceM = 0;
-  roadLanes.clear();
-  vehicles.clear();
-}
-tsp_int Simulation::getRoadLanesCount() { return roadLanes.size(); }
-
-tsp_int Simulation::getRoadLanePointsCount() {
-  if (roadLanes.empty()) {
-    return 0;
-  }
-  return roadLanes[0].pointsCount;
-}
-
-tsp_int Simulation::getVehiclesCount() { return vehicles.size(); }
-
-void Simulation::getVehicles(tsp_vehicle_state *vehicleState) {
-  for (int i = 0; i < vehicles.size(); i++) {
-    vehicleState[i].lane = vehicles[i].lane;
-    vehicleState[i].position = vehicles[i].position;
-    vehicleState[i].velocity = vehicles[i].velocity;
-  }
-}
-
-tsp_int Simulation::getTrafficLightsCount() {
-  tsp_int trafficLightsCount = 0;
-  for (auto &lane : roadLanes) {
-    trafficLightsCount += lane.pointsWithTrafficLights.size();
-  }
-  return trafficLightsCount;
-}
-
-void Simulation::getTrafficLights(tsp_traffic_light_state *trafficLightState) {
-  tsp_id index = 0;
-  for (auto &lane : roadLanes) {
-    for (auto point : lane.pointsWithTrafficLights) {
-      trafficLightState[index].lane = lane.id;
-      trafficLightState[index].position = point->position;
-      trafficLightState[index].isTrafficLightRed = point->isTrafficLightRed;
-      trafficLightState[index].timeToNextState = static_cast<tsp_int>(
-          std::ceil(static_cast<tsp_float>(point->timeToNextState) /
-                    static_cast<tsp_float>(second)));
-      index++;
-    }
-  }
-}
-
 bool Simulation::setP(tsp_float p) {
   if (p < 0.0 || p > 1.0) {
     return false;
@@ -317,28 +168,163 @@ bool Simulation::setSpaceLengthM(tsp_float a_spaceLengthM) {
   return true;
 }
 
+tsp_int Simulation::getRoadLanesCount() { return roadLanes.size(); }
+
+tsp_int Simulation::getRoadLanePointsCount() {
+  if (roadLanes.empty()) {
+    return 0;
+  }
+  return roadLanes[0]->pointsCount;
+}
+
+tsp_int Simulation::getVehiclesCount() { return vehicles.size(); }
+
+void Simulation::getVehicles(tsp_vehicle_state *vehicleState) {
+  for (int i = 0; i < vehicles.size(); i++) {
+    // TODO return breaking light status
+    vehicleState[i].lane = vehicles[i].lane;
+    vehicleState[i].position = vehicles[i].position;
+    vehicleState[i].velocity = vehicles[i].velocity;
+  }
+}
+
+tsp_int Simulation::getTrafficLightsCount() {
+  tsp_int trafficLightsCount = 0;
+  for (auto &lane : roadLanes) {
+    trafficLightsCount += lane->pointsWithTrafficLights.size();
+  }
+  return trafficLightsCount;
+}
+
+void Simulation::getTrafficLights(tsp_traffic_light_state *trafficLightState) {
+  tsp_id index = 0;
+  for (auto &lane : roadLanes) {
+    for (auto point : lane->pointsWithTrafficLights) {
+      trafficLightState[index].lane = lane->id;
+      trafficLightState[index].position = point->position;
+      trafficLightState[index].isTrafficLightRed = point->isTrafficLightRed;
+      trafficLightState[index].timeToNextState = static_cast<tsp_int>(
+          std::ceil(static_cast<tsp_float>(point->timeToNextState) /
+                    static_cast<tsp_float>(second)));
+      index++;
+    }
+  }
+}
+
+void Simulation::initialize(
+    tsp_float newVehicleVelocityMps, tsp_float accelerationMps,
+    tsp_float randomDecelerationMps, tsp_float vehicleOccupiedSpaceM,
+    tsp_float safetyGapM, tsp_float carDensity, tsp_float safeTimeHeadwayS,
+    bool a_allowLaneChanging, tsp_float autonomousCarsPercent) {
+
+  minimalDistance =
+      static_cast<tsp_int>(std::ceil(vehicleOccupiedSpaceM / spaceLengthM));
+  if (minimalDistance < 1) {
+    minimalDistance = 1;
+  }
+  allowLaneChanging = a_allowLaneChanging;
+  tsp_int safetyGap =
+      static_cast<tsp_int>(std::ceil(safetyGapM / spaceLengthM));
+  for (auto lane : roadLanes) {
+    tsp_float realSpacesCount =
+        static_cast<tsp_float>(lane->pointsCount / minimalDistance);
+    tsp_int carsToSpawnCount =
+        static_cast<tsp_int>(realSpacesCount * carDensity);
+    tsp_int newVelocity =
+        static_cast<tsp_int>(newVehicleVelocityMps / spaceLengthM);
+#ifndef NDEBUG
+    std::cout << "TSP: vehicles to spawn " << carsToSpawnCount << std::endl;
+#endif
+    tsp_int autonomousCarsToSpawnCount = static_cast<tsp_int>(std::round(
+        static_cast<tsp_float>(carsToSpawnCount) * autonomousCarsPercent));
+    tsp_int carsLeftToSpawn = carsToSpawnCount;
+    std::vector<tsp_int> positions(carsLeftToSpawn);
+    while (carsLeftToSpawn > 0) {
+      tsp_int newPosition = HelperMath::getRandomInt(
+                                0, static_cast<tsp_int>(realSpacesCount) - 1) *
+                            minimalDistance;
+      bool isAutonomous = (carsLeftToSpawn <= autonomousCarsToSpawnCount);
+      if (addVehicle(lane->id, newPosition, newVelocity, safeTimeHeadwayS,
+                     safetyGap, isAutonomous)) {
+        carsLeftToSpawn--;
+        positions[carsLeftToSpawn] = newPosition;
+      }
+    }
+    std::sort(positions.begin(), positions.end());
+    positions.push_back(positions[0]);
+    for (size_t i = 0; i < positions.size() - 1; i++) {
+      tsp_vehicle &previousVehicle =
+          vehicles[lane->points[positions[i]].vehicle - 1];
+      tsp_vehicle &nextVehicle =
+          vehicles[lane->points[positions[i + 1]].vehicle - 1];
+      previousVehicle.nextVehicle = nextVehicle.id;
+      nextVehicle.previousVehicle = previousVehicle.id;
+    }
+  }
+
+  maximalAcceleration =
+      static_cast<tsp_int>(std::round(accelerationMps / spaceLengthM));
+  randomDeceleration =
+      static_cast<tsp_int>(std::round(randomDecelerationMps / spaceLengthM));
+}
+
+tsp_simulation_result Simulation::gatherResults(tsp_float simulationDurationS) {
+  setTime(simulationDurationS);
+  tsp_simulation_result results;
+  if (vehicles.size() == 0) {
+    results.vehiclesPerTime = 0;
+    results.vehiclesDensity = 0;
+    return results;
+  }
+  tsp_float allRoadsDistance = 0;
+  tsp_int allPointsCount = 0;
+  for (auto lane : roadLanes) {
+    allRoadsDistance +=
+        static_cast<tsp_float>(lane->pointsCount) * spaceLengthM;
+    allPointsCount += lane->pointsCount;
+  }
+  results.vehiclesPerTime = vehiclesCoveredDistanceM / allRoadsDistance *
+                            1000.0 / simulationDurationS;
+  results.vehiclesDensity =
+      static_cast<tsp_float>(vehicles.size() * minimalDistance) /
+      static_cast<tsp_float>(allPointsCount);
+  return results;
+}
+
+void Simulation::clear() {
+  for (auto lane : roadLanes) {
+    delete lane;
+  }
+  time = 0;
+  spaceLengthM = 1.0;
+  velocityDecreaseProbability = 0;
+  vehiclesCoveredDistanceM = 0;
+  roadLanes.clear();
+  vehicles.clear();
+}
+
 tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle &vehicle) {
   if (vehicle.nextVehicle == vehicle.id) {
-    return roadLanes[vehicle.lane].maxVelocity + minimalDistance;
+    return roadLanes[vehicle.lane]->maxVelocity + minimalDistance;
   }
   tsp_int d = vehicles[vehicle.nextVehicle - 1].position - vehicle.position;
   if (d < 0) {
-    d += roadLanes[vehicle.lane].pointsCount;
+    d += roadLanes[vehicle.lane]->pointsCount;
   }
   return d - minimalDistance + 1;
 }
 
 tsp_int Simulation::distanceToTheNearestRedTrafficLight(tsp_vehicle &vehicle) {
-  tsp_int d = roadLanes[vehicle.lane].maxVelocity + minimalDistance;
-  if (roadLanes[vehicle.lane].pointsWithTrafficLights.empty()) {
+  tsp_int d = roadLanes[vehicle.lane]->maxVelocity + minimalDistance;
+  if (roadLanes[vehicle.lane]->pointsWithTrafficLights.empty()) {
     return d;
   }
-  for (auto trafficLight : roadLanes[vehicle.lane].pointsWithTrafficLights) {
+  for (auto trafficLight : roadLanes[vehicle.lane]->pointsWithTrafficLights) {
     if (trafficLight->isTrafficLightRed &&
         trafficLight->position != vehicle.position) {
       tsp_int newDistance = trafficLight->position - vehicle.position;
       if (newDistance < 0) {
-        newDistance += roadLanes[vehicle.lane].pointsCount;
+        newDistance += roadLanes[vehicle.lane]->pointsCount;
       }
       if (newDistance < d) {
         d = newDistance;
@@ -346,43 +332,6 @@ tsp_int Simulation::distanceToTheNearestRedTrafficLight(tsp_vehicle &vehicle) {
     }
   }
   return d - minimalDistance + 1;
-}
-
-tsp_int Simulation::getNewVelocity(tsp_vehicle &vehicle) {
-  tsp_int maxVelocity = std::min(vehicle.velocity + maximalAcceleration,
-                                 roadLanes[vehicle.lane].maxVelocity);
-  tsp_int distance = distanceToTheNextVehicle(vehicle);
-
-  tsp_int newVelocity = std::min(maxVelocity, distance - 1);
-
-  distance = distanceToTheNearestRedTrafficLight(vehicle);
-
-  if (distance - 1 < newVelocity) {
-    newVelocity = distance - 1;
-  }
-
-  if (vehicle.isAutonomous) {
-    return std::min(newVelocity, vehicle.greenWaveVelocity);
-  }
-  return newVelocity;
-
-  // If the next vehicle moving more slowly, adjust velocity to prevent sudden
-  // velocity changes
-  // return std::min(getRecommendedVelocity(vehicle), maxVelocity);
-}
-
-tsp_int Simulation::getRecommendedVelocity(tsp_vehicle &vehicle) {
-  // TODO fix this function to do something useful
-  tsp_vehicle &nextVehicle = vehicles[vehicle.nextVehicle - 1];
-  tsp_int distance = distanceToTheNextVehicle(vehicle);
-  tsp_int recommendedVelocity = nextVehicle.velocity;
-  tsp_int requiredDistance = recommendedVelocity + 1;
-  while (requiredDistance + recommendedVelocity + maximalAcceleration <=
-         distance) {
-    recommendedVelocity += maximalAcceleration;
-    requiredDistance += recommendedVelocity;
-  }
-  return recommendedVelocity;
 }
 
 } // namespace TSP

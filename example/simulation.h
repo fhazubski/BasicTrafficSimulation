@@ -13,7 +13,7 @@ public:
   explicit Simulation(QObject *parent = nullptr);
 
 public slots:
-  void setTime(qreal time);
+  void setTime(qreal timeS);
 
 public:
   TSP::tsp_int m_roadLanesCount;
