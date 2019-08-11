@@ -12,7 +12,7 @@ namespace TSP {
 void SimulationKnospe::updateVehicleStatusAndPosition() {
   for (auto &vehicle : vehicles) {
 
-    // Step 0
+    // Step 0 - determination of randomization parameter
     bool isSafeTimeHeadway = isWithinSafeTimeHeadway(vehicle);
     bool isNextBreaking = isNextVehicleBreaking(vehicle);
     tsp_float decelerationProbability;
@@ -25,40 +25,37 @@ void SimulationKnospe::updateVehicleStatusAndPosition() {
     }
     vehicle.newIsBreaking = false;
 
-    // Step 1
+    // Step 1 - acceleration
     if ((!isNextBreaking && !vehicle.isBreaking) || isSafeTimeHeadway) {
-      vehicle.newVelocity =
-          std::min(vehicle.velocity + 1, roadLanes[vehicle.lane]->maxVelocity);
+      vehicle.newVelocity = std::min(vehicle.velocity + maximalAcceleration,
+                                     roadLanes[vehicle.lane]->maxVelocity);
     } else {
       vehicle.newVelocity = vehicle.velocity;
     }
-    // Step 2
+    // Step 2 - breaking
     tsp_int distance = distanceToTheNextVehicle(vehicle);
-    if (distance == minimalDistance * (-1)) {
-      distance = roadLanes[vehicle.lane]->maxVelocity * 10;
-    } else {
-      assert(distance >= 0);
-    }
+    assert(distance >= 0);
     tsp_int effectiveDistance =
         distance + std::max(anticipatedVelocity(vehicle) - vehicle.safetyGap,
                             static_cast<tsp_int>(0));
+
     vehicle.newVelocity = std::min(effectiveDistance, vehicle.newVelocity);
 
     if (vehicle.newVelocity < vehicle.velocity) {
       vehicle.newIsBreaking = true;
     }
 
-    // Step 3
+    // Step 3 - randomized breaking
     if (HelperMath::getRandom() <= decelerationProbability) {
-      vehicle.newVelocity =
-          std::max(vehicle.newVelocity - 1, static_cast<tsp_int>(0));
+      vehicle.newVelocity = std::max(vehicle.newVelocity - randomDeceleration,
+                                     static_cast<tsp_int>(0));
       if (isNextBreaking && !isSafeTimeHeadway) {
         vehicle.newIsBreaking = true;
       }
     }
   }
 
-  // Step 4
+  // Step 4 - movement
   for (auto &vehicle : vehicles) {
     vehicle.velocity = vehicle.newVelocity;
     vehicle.isBreaking = vehicle.newIsBreaking;
@@ -145,7 +142,8 @@ bool SimulationKnospe::isWithinSafeTimeHeadway(tsp_vehicle &vehicle) {
   auto gap = distanceToTheNextVehicle(vehicle);
   tsp_float timeHeadwayS =
       static_cast<tsp_float>(gap) / static_cast<tsp_float>(vehicle.velocity);
-  return (timeHeadwayS >= vehicle.safeTimeHeadwayS);
+  return (timeHeadwayS >= std::min(static_cast<tsp_float>(vehicle.velocity),
+                                   vehicle.safeTimeHeadwayS));
 }
 
 bool SimulationKnospe::isNextVehicleBreaking(tsp_vehicle &vehicle) {

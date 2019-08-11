@@ -36,6 +36,14 @@ void SimulationView::paint(QPainter *painter) {
     painter->drawRect(rect);
     painter->drawText(rect, Qt::AlignCenter,
                       QString::number(vehicle->velocity));
+    for (int i = 1; i < vehicle->usedSpaces; i++) {
+      rect.setX(rect.x() - cellSize);
+      if (rect.x() < xStart) {
+        rect.setX(rect.x() + cellSize * m_simulation->m_roadLanePointsCount);
+      }
+      rect.setWidth(cellSize);
+      painter->drawRect(rect);
+    }
   }
 
   QBrush greenLight(QColor("#A3FF6A"));

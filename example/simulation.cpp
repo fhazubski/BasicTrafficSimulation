@@ -5,15 +5,23 @@
 #include <iostream>
 
 Simulation::Simulation(QObject *parent) : QObject(parent) {
-  DataNaSchTrafficLightsThree08Speed simulationData;
-  simulationData.carDensity = 0.2;
-  simulationData.autonomousCarsPercent = 0;
-  simulationData.trafficLightsData.enableTrafficLights = true;
-  simulationData.trafficLightsData.spacingPercent = 0.8;
-  simulationData.trafficLightsData.trafficLightsCount = 5;
-  simulationData.trafficLightsData.optimalSpeedPercentOfMaxSpeed = 0.8;
-  simulationData.trafficLightsData.redLightDurationPercent = 0.2;
-  simulationData.laneLengthM = 200;
+  //  DataNaSchTrafficLightsThree08Speed simulationData;
+  //  simulationData.carDensity = 0.2;
+  //  simulationData.autonomousCarsPercent = 0;
+  //  simulationData.trafficLightsData.enableTrafficLights = true;
+  //  simulationData.trafficLightsData.spacingPercent = 0.8;
+  //  simulationData.trafficLightsData.trafficLightsCount = 5;
+  //  simulationData.trafficLightsData.optimalSpeedPercentOfMaxSpeed = 0.8;
+  //  simulationData.trafficLightsData.redLightDurationPercent = 0.2;
+  //  simulationData.laneLengthM = 200;
+
+  DataKnospe simulationData;
+  simulationData.carDensity = 0.7;
+  simulationData.vehicleOccupiedSpaceM = 3.0;
+  simulationData.laneLengthM = 40;
+  simulationData.maxVelocityMps = 9.0;
+  simulationData.randomDecelerationMps = 9.0;
+  simulationData.laneCount = 1;
   tspInitializeSimulation(simulationData);
   m_roadLanesCount = tspGetRoadLanesCount();
   m_roadLanePointsCount = tspGetRoadLanePointsCount();

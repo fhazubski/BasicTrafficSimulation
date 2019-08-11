@@ -61,15 +61,15 @@ int main(int argc, char *argv[]) {
     //    simulateAndSave("DataNaSchP05.csv", DataNaSchP05());
 
     /* NaSch - Knospe comparison */
-    //    simulateAndSave("DataNaSch.csv", DataNaSch());
-    //    simulateAndSave("DataNaSchLikeKnospe.csv", DataNaSchLikeKnospe());
+    simulateAndSave("DataNaSch.csv", DataNaSch());
+    simulateAndSave("DataNaSchLikeKnospe.csv", DataNaSchLikeKnospe());
     simulateAndSave("DataKnospe.csv", DataKnospe());
     simulateAndSave("DataKnospeLikeNaSch.csv", DataKnospeLikeNaSch());
-    //    simulateAndSave("DataKnospeSingleLane.csv", DataKnospeSingleLane());
-    //    simulateAndSave("DataKnospeWithoutLaneChanging.csv",
-    //                    DataKnospeWithoutLaneChanging());
-    //    simulateAndSave("KnospeWithoutRandomizedBreaking.csv",
-    //                    DataKnospeWithoutRandomizedBreaking());
+    simulateAndSave("DataKnospeSingleLane.csv", DataKnospeSingleLane());
+    simulateAndSave("DataKnospeWithoutLaneChanging.csv",
+                    DataKnospeWithoutLaneChanging());
+    simulateAndSave("KnospeWithoutRandomizedBreaking.csv",
+                    DataKnospeWithoutRandomizedBreaking());
 
     /* NaSch with randomized traffic lights */
     //    simulateAndSave("DataNaSch.csv", DataNaSch());

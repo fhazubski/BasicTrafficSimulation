@@ -57,7 +57,7 @@ tsp_int SimulationNaSch::getNewVelocity(tsp_vehicle &vehicle) {
                                  roadLanes[vehicle.lane]->maxVelocity);
   tsp_int distance = distanceToTheNextVehicle(vehicle);
 
-  tsp_int newVelocity = std::min(maxVelocity, distance - 1);
+  tsp_int newVelocity = std::min(maxVelocity, distance);
 
   distance = distanceToTheNearestRedTrafficLight(vehicle);
 

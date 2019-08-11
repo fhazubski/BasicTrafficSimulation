@@ -83,6 +83,7 @@ struct tsp_vehicle_state {
   tsp_id lane;
   tsp_int position;
   tsp_int velocity;
+  tsp_int usedSpaces;
 };
 
 struct tsp_traffic_light_state {

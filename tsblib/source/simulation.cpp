@@ -185,6 +185,7 @@ void Simulation::getVehicles(tsp_vehicle_state *vehicleState) {
     vehicleState[i].lane = vehicles[i].lane;
     vehicleState[i].position = vehicles[i].position;
     vehicleState[i].velocity = vehicles[i].velocity;
+    vehicleState[i].usedSpaces = minimalDistance;
   }
 }
 
@@ -305,13 +306,13 @@ void Simulation::clear() {
 
 tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle &vehicle) {
   if (vehicle.nextVehicle == vehicle.id) {
-    return roadLanes[vehicle.lane]->maxVelocity + minimalDistance;
+    return roadLanes[vehicle.lane]->pointsCount;
   }
   tsp_int d = vehicles[vehicle.nextVehicle - 1].position - vehicle.position;
   if (d < 0) {
     d += roadLanes[vehicle.lane]->pointsCount;
   }
-  return d - minimalDistance + 1;
+  return d - minimalDistance;
 }
 
 tsp_int Simulation::distanceToTheNearestRedTrafficLight(tsp_vehicle &vehicle) {
