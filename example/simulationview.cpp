@@ -27,12 +27,18 @@ void SimulationView::paint(QPainter *painter) {
     }
   }
 
-  painter->setBrush(QBrush(QColor("#00CCFF")));
+  QBrush autonomousVehicle(QColor("#FFCC00"));
+  QBrush regularVehicle(QColor("#00CCFF"));
+  QBrush breakingLight(QColor("#F11250"));
   for (TSP::tsp_vehicle_state *vehicle = m_simulation->m_vehiclesStates;
        vehicle < m_simulation->m_vehiclesStates + m_simulation->m_vehiclesCount;
        vehicle++) {
+    painter->setBrush(vehicle->isAutonomous ? autonomousVehicle
+                                            : regularVehicle);
     QRectF rect(xStart + vehicle->position * cellSize,
-                yStart + vehicle->lane * cellSize, cellSize, cellSize);
+                yStart + (m_simulation->m_roadLanesCount - 1 - vehicle->lane) *
+                             cellSize,
+                cellSize, cellSize);
     painter->drawRect(rect);
     painter->drawText(rect, Qt::AlignCenter,
                       QString::number(vehicle->velocity));
@@ -42,6 +48,12 @@ void SimulationView::paint(QPainter *painter) {
         rect.setX(rect.x() + cellSize * m_simulation->m_roadLanePointsCount);
       }
       rect.setWidth(cellSize);
+      painter->drawRect(rect);
+    }
+
+    if (vehicle->isBreaking) {
+      rect.setWidth(rect.width() / 5.0);
+      painter->setBrush(breakingLight);
       painter->drawRect(rect);
     }
   }

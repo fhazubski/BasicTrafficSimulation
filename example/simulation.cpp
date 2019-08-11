@@ -16,12 +16,11 @@ Simulation::Simulation(QObject *parent) : QObject(parent) {
   //  simulationData.laneLengthM = 200;
 
   DataKnospe simulationData;
-  simulationData.carDensity = 0.7;
+  simulationData.carDensity = 0.1;
   simulationData.vehicleOccupiedSpaceM = 3.0;
   simulationData.laneLengthM = 40;
-  simulationData.maxVelocityMps = 9.0;
-  simulationData.randomDecelerationMps = 9.0;
-  simulationData.laneCount = 1;
+  simulationData.maxVelocityMps = 7.5;
+  simulationData.newVehicleVelocityMps = simulationData.maxVelocityMps;
   tspInitializeSimulation(simulationData);
   m_roadLanesCount = tspGetRoadLanesCount();
   m_roadLanePointsCount = tspGetRoadLanePointsCount();
