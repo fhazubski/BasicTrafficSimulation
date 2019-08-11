@@ -225,10 +225,10 @@ struct DataKnospeLikeNaSch : TSP::tsp_simulation_data_knospe {
     velocityDecreaseProbabilityB = 0.1;
     velocityDecreaseProbability0 = 0.1;
     velocityDecreaseProbabilityD = 0.1;
-    safeTimeHeadwayS = 6; //?
+    safeTimeHeadwayS = 6; //? TODO
     vehicleOccupiedSpaceM = 7.5;
     spaceLengthM = 7.5;
-    safetyGapM = 10.5; //?
+    safetyGapM = 10.5; //? TODO
     laneCount = 1;
     laneLengthM = 1000;
     allowLaneChanging = false;

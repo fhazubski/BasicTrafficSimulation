@@ -8,9 +8,6 @@ set(COMMON_SOURCES
   include/tslib/types.h
   source/api.cpp
   source/base.h
-  source/globals.h
-  source/helpers/helper_id.cpp
-  source/helpers/helper_id.h
   source/helpers/helper_math.cpp
   source/helpers/helper_math.h
   source/metrics.h
@@ -20,7 +17,8 @@ set(COMMON_SOURCES
   source/simulation_knospe.h
   source/simulation_nasch.cpp
   source/simulation_nasch.h
-  source/types.cpp)
+  source/types.cpp
+  source/types_private.h)
 add_library(tslib STATIC ${COMMON_SOURCES})
 add_executable(tests ${COMMON_SOURCES}
   tests/main.cpp)

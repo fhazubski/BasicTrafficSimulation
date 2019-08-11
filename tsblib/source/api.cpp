@@ -1,10 +1,7 @@
 #include "tslib/api.h"
-#include "source/globals.h"
-#include "source/helpers/helper_id.h"
-#include "source/helpers/helper_math.h"
+#include "source/base.h"
 #include "source/simulation_knospe.h"
 #include "source/simulation_nasch.h"
-#include "tslib/types.h"
 #include <iostream>
 
 #define CHECK_INIT_AND_ON_FAIL_RETURN(VALUE)                                   \
@@ -32,13 +29,13 @@ template <typename T> void allocateSimulation() {
 } // namespace TSP
 
 void tspInitializeSimulation(TSP::tsp_simulation_data_nasch data) {
-  allocateSimulation<SimulationNaSch>();
-  auto naSchSimulation = static_cast<SimulationNaSch *>(TSP::simulation);
+  TSP::allocateSimulation<TSP::SimulationNaSch>();
+  auto naSchSimulation = static_cast<TSP::SimulationNaSch *>(TSP::simulation);
   naSchSimulation->setSpaceLengthM(data.spaceLengthM);
-  naSchSimulation->addLane(
-      data.laneLengthM, 1,
-      static_cast<tsp_int>(std::round(data.maxVelocityMps / data.spaceLengthM)),
-      data.trafficLightsData);
+  naSchSimulation->addLane(data.laneLengthM, 1,
+                           static_cast<TSP::tsp_int>(std::round(
+                               data.maxVelocityMps / data.spaceLengthM)),
+                           data.trafficLightsData);
   naSchSimulation->setP(data.velocityDecreaseProbability);
   naSchSimulation->initialize(data.newVehicleVelocityMps, data.accelerationMps,
                               data.randomDecelerationMps,
@@ -47,15 +44,15 @@ void tspInitializeSimulation(TSP::tsp_simulation_data_nasch data) {
 }
 
 void tspInitializeSimulation(TSP::tsp_simulation_data_knospe data) {
-  allocateSimulation<SimulationKnospe>();
-  auto knospeSimulation = static_cast<SimulationKnospe *>(TSP::simulation);
+  TSP::allocateSimulation<TSP::SimulationKnospe>();
+  auto knospeSimulation = static_cast<TSP::SimulationKnospe *>(TSP::simulation);
   knospeSimulation->setSpaceLengthM(data.spaceLengthM);
-  tsp_traffic_lights_data tlData;
+  TSP::tsp_traffic_lights_data tlData;
   tlData.enableTrafficLights = false;
-  knospeSimulation->addLane(
-      data.laneLengthM, data.laneCount,
-      static_cast<tsp_int>(std::round(data.maxVelocityMps / data.spaceLengthM)),
-      tlData);
+  knospeSimulation->addLane(data.laneLengthM, data.laneCount,
+                            static_cast<TSP::tsp_int>(std::round(
+                                data.maxVelocityMps / data.spaceLengthM)),
+                            tlData);
   knospeSimulation->setPb(data.velocityDecreaseProbabilityB);
   knospeSimulation->setP0(data.velocityDecreaseProbability0);
   knospeSimulation->setP(data.velocityDecreaseProbabilityD);

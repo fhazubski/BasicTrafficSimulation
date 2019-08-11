@@ -1,11 +1,8 @@
 #include "source/simulation.h"
-#include "source/globals.h"
 #include "source/helpers/helper_math.h"
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <iostream>
-#include <iterator>
 
 namespace TSP {
 
@@ -186,6 +183,8 @@ void Simulation::getVehicles(tsp_vehicle_state *vehicleState) {
     vehicleState[i].position = vehicles[i].position;
     vehicleState[i].velocity = vehicles[i].velocity;
     vehicleState[i].usedSpaces = minimalDistance;
+    vehicleState[i].isBreaking = vehicles[i].isBreaking;
+    vehicleState[i].isAutonomous = vehicles[i].isAutonomous;
   }
 }
 

@@ -1,7 +1,6 @@
 #pragma once
 #include "source/base.h"
 #include "source/simulation.h"
-#include <vector>
 
 namespace TSP {
 

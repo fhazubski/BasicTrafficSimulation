@@ -1,7 +1,6 @@
 #pragma once
 #include "source/base.h"
 #include "source/simulation.h"
-#include <vector>
 
 namespace TSP {
 
@@ -18,8 +17,7 @@ private:
   inline bool isNextVehicleBreaking(tsp_vehicle &vehicle);
   bool canChangeLaneRightToLeft(tsp_vehicle &vehicle);
   bool canChangeLaneLeftToRight(tsp_vehicle &vehicle);
-  bool getSafetyCriterionOfLaneChanging(tsp_vehicle &vehicle, tsp_int dPred,
-                                        bool rightToLeft);
+  bool getSafetyCriterionOfLaneChanging(tsp_vehicle &vehicle, bool rightToLeft);
   tsp_int distanceToThePredecessorOnAnotherLane(tsp_vehicle &vehicle,
                                                 bool predecessorIsOnTheLeft);
   bool isThereEnoughSpaceForLaneChange(tsp_vehicle &vehicle, tsp_int dPred,

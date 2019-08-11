@@ -1,11 +1,8 @@
 #include "source/simulation_nasch.h"
-#include "source/globals.h"
 #include "source/helpers/helper_math.h"
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <iostream>
-#include <iterator>
 
 namespace TSP {
 

@@ -2,10 +2,7 @@
 #include "source/helpers/helper_math.h"
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <iostream>
-#include <iterator>
-#include <vector>
 
 namespace TSP {
 
@@ -149,6 +146,7 @@ bool SimulationKnospe::isWithinSafeTimeHeadway(tsp_vehicle &vehicle) {
 bool SimulationKnospe::isNextVehicleBreaking(tsp_vehicle &vehicle) {
   return vehicles[vehicle.nextVehicle - 1].isBreaking;
 }
+
 bool SimulationKnospe::canChangeLaneRightToLeft(tsp_vehicle &vehicle) {
   if (vehicle.lane == roadLanes.size() - 1) {
     return false;
@@ -156,48 +154,45 @@ bool SimulationKnospe::canChangeLaneRightToLeft(tsp_vehicle &vehicle) {
   bool incentiveCriterion =
       !vehicle.isBreaking &&
       (vehicle.velocity > distanceToTheNextVehicle(vehicle));
-  if (!incentiveCriterion) {
-    return false;
-  }
-  if (roadLanes[vehicle.lane + 1]->vehiclesCount == 0) {
-    return true;
-  }
-  tsp_int dPred = distanceToThePredecessorOnAnotherLane(vehicle, true);
-  if (!isThereEnoughSpaceForLaneChange(vehicle, dPred, true)) {
-    return false;
-  }
-  return getSafetyCriterionOfLaneChanging(vehicle, dPred, true);
+  return incentiveCriterion && getSafetyCriterionOfLaneChanging(vehicle, true);
 }
+
 bool SimulationKnospe::canChangeLaneLeftToRight(tsp_vehicle &vehicle) {
   if (vehicle.lane == 0) {
     return false;
   }
-  if (roadLanes[vehicle.lane - 1]->vehiclesCount == 0) {
-    return true;
-  }
-  tsp_int dPred = distanceToThePredecessorOnAnotherLane(vehicle, false);
-  if (!isThereEnoughSpaceForLaneChange(vehicle, dPred, false)) {
+  if (!getSafetyCriterionOfLaneChanging(vehicle, false)) {
     return false;
   }
+  tsp_int dPred = distanceToThePredecessorOnAnotherLane(vehicle, false);
   tsp_float headwayPred =
       static_cast<tsp_float>(dPred) / static_cast<tsp_float>(vehicle.velocity);
   tsp_float headway =
       static_cast<tsp_float>(distanceToTheNextVehicle(vehicle)) /
       static_cast<tsp_float>(vehicle.velocity);
+  auto &predVehicle = predecessorVehicle(vehicle, dPred, false);
   bool incentiveCriterion =
       !vehicle.isBreaking && (headwayPred > 3.0) &&
       ((headway > 6.0) ||
-       (vehicle.velocity > distanceToTheNextVehicle(vehicle)));
-  return incentiveCriterion &&
-         getSafetyCriterionOfLaneChanging(vehicle, dPred, false);
+       (vehicle.velocity > distanceToTheNextVehicle(predVehicle)));
+  return incentiveCriterion;
 }
 
 bool SimulationKnospe::getSafetyCriterionOfLaneChanging(tsp_vehicle &vehicle,
-                                                        tsp_int dPred,
                                                         bool rightToLeft) {
+  tsp_int destinationLane = vehicle.lane + (rightToLeft ? 1 : -1);
+  if (roadLanes[destinationLane]->vehiclesCount == 0) {
+    return true;
+  }
+  tsp_int dPred = distanceToThePredecessorOnAnotherLane(vehicle, rightToLeft);
+  if (!isThereEnoughSpaceForLaneChange(vehicle, dPred, rightToLeft)) {
+    return false;
+  }
+
   auto &predVehicle = predecessorVehicle(vehicle, dPred, rightToLeft);
   auto &succVehicle = vehicles[predVehicle.previousVehicle - 1];
-  tsp_int dSucc = distanceToTheNextVehicle(succVehicle) - dPred - 1;
+  tsp_int dSucc =
+      distanceToTheNextVehicle(succVehicle) - dPred - minimalDistance;
   tsp_int anticipatedVelocityPred =
       std::min(distanceToTheNextVehicle(predVehicle), predVehicle.velocity);
   tsp_int effectiveDistancePred =
@@ -222,10 +217,7 @@ tsp_int SimulationKnospe::distanceToThePredecessorOnAnotherLane(
       return dPred - minimalDistance;
     }
     dPred++;
-    if (dPred == 0) {
-      assert(false);
-      return -1;
-    }
+    assert(dPred != 0);
     if (vehicle.position + dPred >= roadLanes[destinationLane]->pointsCount) {
       dPred -= roadLanes[destinationLane]->pointsCount;
     }
@@ -241,11 +233,8 @@ bool SimulationKnospe::isThereEnoughSpaceForLaneChange(
       predecessorVehicle(vehicle, dPred, predecessorIsOnTheLeft);
   tsp_int dSucc =
       distanceToTheNextVehicle(vehicles[predVehicle.previousVehicle - 1]) -
-      dPred - 1;
-  if (dSucc + 1 < minimalDistance) {
-    return false;
-  }
-  return true;
+      dPred - minimalDistance;
+  return (dSucc >= 0);
 }
 
 tsp_vehicle &SimulationKnospe::predecessorVehicle(tsp_vehicle &vehicle,
@@ -264,6 +253,9 @@ tsp_vehicle &SimulationKnospe::predecessorVehicle(tsp_vehicle &vehicle,
 }
 
 tsp_vehicle &SimulationKnospe::getNextVehicle(tsp_vehicle &vehicle) {
+  if (roadLanes[vehicle.lane]->vehiclesCount == 1) {
+    return vehicle;
+  }
   // TODO optimize
   tsp_int offset = 1;
   while (true) {
@@ -277,9 +269,7 @@ tsp_vehicle &SimulationKnospe::getNextVehicle(tsp_vehicle &vehicle) {
            1];
     }
     offset++;
-    if (offset == 0) {
-      return vehicle;
-    }
+    assert(offset != 0);
   }
 }
 
