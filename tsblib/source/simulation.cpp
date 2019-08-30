@@ -38,8 +38,9 @@ void Simulation::addLane(tsp_float lengthM, tsp_int laneCount,
       static_cast<tsp_int>(std::round(lengthM / spaceLengthM));
   for (int i = 0; i < laneCount; i++) {
     tsp_id newLaneId = static_cast<tsp_id>(roadLanes.size());
-    roadLanes.push_back(new tsp_road_lane(
-        spacesCount, spaceLengthM, maxVelocity, newLaneId, &trafficLightsData));
+    roadLanes.push_back(
+        new tsp_road_lane(spacesCount, spaceLengthM, maxVelocity, newLaneId,
+                          (newLaneId == 0 ? &trafficLightsData : nullptr)));
   }
 }
 
@@ -315,11 +316,11 @@ tsp_int Simulation::distanceToTheNextVehicle(tsp_vehicle &vehicle) {
 }
 
 tsp_int Simulation::distanceToTheNearestRedTrafficLight(tsp_vehicle &vehicle) {
-  tsp_int d = roadLanes[vehicle.lane]->maxVelocity + minimalDistance;
-  if (roadLanes[vehicle.lane]->pointsWithTrafficLights.empty()) {
+  tsp_int d = roadLanes[vehicle.lane]->pointsCount;
+  if (roadLanes[0]->pointsWithTrafficLights.empty()) {
     return d;
   }
-  for (auto trafficLight : roadLanes[vehicle.lane]->pointsWithTrafficLights) {
+  for (auto trafficLight : roadLanes[0]->pointsWithTrafficLights) {
     if (trafficLight->isTrafficLightRed &&
         trafficLight->position != vehicle.position) {
       tsp_int newDistance = trafficLight->position - vehicle.position;
@@ -331,7 +332,7 @@ tsp_int Simulation::distanceToTheNearestRedTrafficLight(tsp_vehicle &vehicle) {
       }
     }
   }
-  return d - minimalDistance + 1;
+  return d - 1;
 }
 
 } // namespace TSP

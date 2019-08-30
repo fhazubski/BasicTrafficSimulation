@@ -58,8 +58,8 @@ tsp_int SimulationNaSch::getNewVelocity(tsp_vehicle &vehicle) {
 
   distance = distanceToTheNearestRedTrafficLight(vehicle);
 
-  if (distance - 1 < newVelocity) {
-    newVelocity = distance - 1;
+  if (distance < newVelocity) {
+    newVelocity = distance;
   }
 
   if (vehicle.isAutonomous) {
