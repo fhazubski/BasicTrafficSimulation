@@ -11,9 +11,8 @@
 #include <fstream>
 #include <iostream>
 
-#define SIMULATE_AND_SAVE_TO_FILE 1
+#define SIMULATE_AND_SAVE_TO_FILE 0
 #define SIMULATE_QUICK 0
-#define SIMULATE_KNOSPE 0
 
 struct simulationResultCompare {
   inline bool operator()(const TSP::tsp_simulation_result &result1,
@@ -23,6 +22,7 @@ struct simulationResultCompare {
 };
 
 template <typename T> void simulateAndSave(const char *filename, T data) {
+  std::cout << "Generating " << filename << std::endl;
   std::ofstream outCsv;
   outCsv.open(filename);
   std::vector<TSP::tsp_simulation_result> results;
@@ -132,6 +132,7 @@ int main(int argc, char *argv[]) {
     //    simulateAndSave("DataNaSchTrafficLightsThree04SpeedA1.csv",
     //                    DataNaSchTrafficLightsThree04SpeedA1());
 
+    std::cout << "Results generated successfully" << std::endl;
     return 0;
   }
 

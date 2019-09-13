@@ -7,7 +7,7 @@ import QtQuick.Controls 1.4
 Window {
     visible: true
     width: 640
-    height: 480
+    height: 180
 
     Simulation {
         id: simulation
