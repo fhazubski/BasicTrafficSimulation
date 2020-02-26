@@ -8,13 +8,13 @@ This project is developed in a form of a standalone static C++ library (tslib). 
 Below you can find the setup I have been using.
 
 #### Tools
-* Microsoft Visual Studio Community 2017
-* CMake 3.13.2
-* Qt Creator 4.8.2
-* Qt 5.9.7 MSVC2017 64bit
+* Microsoft Visual Studio Community 2019
+* CMake 3.16.4
+* Qt Creator 4.11.1
+* Qt 5.12.7 MSVC2017 64bit
 
 #### Steps to run the example application
-* Generate project files with cmake. Simply run `tsblib/generate_solution_VS2017x64.cmd`
+* Generate project files with cmake. Simply run `tsblib/generate_solution_VS2019.cmd`
 * Build the project and build INSTALL target. This will copy library binaries and headers to the path expected by the example Qt project.
 * Open example Qt project. Open `example/TrafficSimulationBasic.pro` with Qt Creator.
 * Build and run the project.
