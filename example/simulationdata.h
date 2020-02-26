@@ -32,6 +32,17 @@ struct TrafficLightsSingleFullSpeedNotRandomized
 };
 
 struct DataNaSch : TSP::tsp_simulation_data_nasch {
+  struct TrafficLights : TSP::tsp_traffic_lights_data {
+    TrafficLights() {
+      enableTrafficLights = true;
+      useRandomizedInputs = false;
+      trafficLightsCount = 3;
+      spacingPercent = 0.5;
+      optimalSpeedPercentOfMaxSpeed = 0.8;
+      redLightDurationPercent = 0.2;
+    }
+  };
+
   DataNaSch() {
     maxVelocityMps = 37.5;
     newVehicleVelocityMps = 37.5;
@@ -41,8 +52,8 @@ struct DataNaSch : TSP::tsp_simulation_data_nasch {
     vehicleOccupiedSpaceM = 7.5;
     spaceLengthM = 7.5;
     laneLengthM = 1000;
-    autonomousCarsPercent = 0;
-    trafficLightsData = NoTrafficLights();
+    autonomousCarsPercent = 0.5;
+    trafficLightsData = TrafficLights();
   }
 };
 

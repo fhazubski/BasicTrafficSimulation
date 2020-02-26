@@ -1,5 +1,6 @@
 #include "source/helpers/helper_math.h"
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <ctime>
 

@@ -116,9 +116,8 @@ void Simulation::v2iCommunication() {
     }
 
     tsp_int timeToCrossLightWithOptimalVelocity =
-        (distanceToNextLight + nextLight->optimalVelocity +
-         maximalAcceleration - 1) /
-        (nextLight->optimalVelocity + maximalAcceleration);
+        (distanceToNextLight + vehicle.velocity + maximalAcceleration - 1) /
+        (vehicle.velocity + maximalAcceleration);
     tsp_int timeInfluencingLightState =
         timeToCrossLightWithOptimalVelocity %
         ((nextLight->redLightDurationS + nextLight->greenLightDurationS) /
@@ -134,8 +133,7 @@ void Simulation::v2iCommunication() {
           second;
     }
     if (!isLightRedOnArrival) {
-      vehicle.greenWaveVelocity =
-          nextLight->optimalVelocity + maximalAcceleration;
+      vehicle.greenWaveVelocity = vehicle.velocity + maximalAcceleration;
       continue;
     }
 

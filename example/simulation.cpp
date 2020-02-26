@@ -5,23 +5,25 @@
 #include <iostream>
 
 Simulation::Simulation(QObject *parent) : QObject(parent) {
-  //  DataNaSchTrafficLightsThree08Speed simulationData;
-  //  simulationData.carDensity = 0.2;
-  //  simulationData.autonomousCarsPercent = 0;
-  //  simulationData.trafficLightsData.enableTrafficLights = true;
-  //  simulationData.trafficLightsData.spacingPercent = 0.8;
-  //  simulationData.trafficLightsData.trafficLightsCount = 5;
-  //  simulationData.trafficLightsData.optimalSpeedPercentOfMaxSpeed = 0.8;
-  //  simulationData.trafficLightsData.redLightDurationPercent = 0.2;
-  //  simulationData.laneLengthM = 200;
-
-  DataKnospe simulationData;
-  simulationData.carDensity = 0.1;
-  simulationData.vehicleOccupiedSpaceM = 3.0;
-  simulationData.laneLengthM = 40;
-  simulationData.maxVelocityMps = 7.5;
-  simulationData.newVehicleVelocityMps = simulationData.maxVelocityMps;
+  DataNaSch simulationData;
+  simulationData.carDensity = 0.3;
+  simulationData.autonomousCarsPercent = 0.0;
+  simulationData.trafficLightsData.enableTrafficLights = true;
+  simulationData.trafficLightsData.spacingPercent = 0.4;
+  simulationData.trafficLightsData.trafficLightsCount = 2;
+  simulationData.trafficLightsData.optimalSpeedPercentOfMaxSpeed = 1;
+  simulationData.trafficLightsData.redLightDurationPercent = 0.4;
+  simulationData.laneLengthM = 200;
   tspInitializeSimulation(simulationData);
+
+  //  DataKnospe simulationData;
+  //  simulationData.carDensity = 0.3;
+  //  simulationData.vehicleOccupiedSpaceM = 3.0;
+  //  simulationData.laneLengthM = 40;
+  //  // simulationData.maxVelocityMps = 7.5;
+  //  simulationData.newVehicleVelocityMps = simulationData.maxVelocityMps;
+  //  tspInitializeSimulation(simulationData);
+
   m_roadLanesCount = tspGetRoadLanesCount();
   m_roadLanePointsCount = tspGetRoadLanePointsCount();
 
