@@ -1,7 +1,16 @@
 #include "include/tslib/api.h"
 #include <iostream>
 
-int main() {
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
+int main(int argc, char **argv) {
+  ::testing::InitGoogleMock(&argc, argv);
+
+  return RUN_ALL_TESTS();
+
+  // TODO: REFACTOR BELOW TESTS TO USE GTEST
+  /*
   int repeats = 20;
 #ifndef NDEBUG
   repeats = 2;
@@ -91,4 +100,5 @@ int main() {
     tspGatherResults(1000);
   }
   return 0;
+  */
 }

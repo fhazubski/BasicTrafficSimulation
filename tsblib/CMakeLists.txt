@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 project(tslib VERSION 1.0.0 DESCRIPTION "Traffic Simulation Library")
 include(GNUInstallDirs)
 include(GenerateExportHeader)
+
 set(COMMON_SOURCES
   ${PROJECT_BINARY_DIR}/tslib_export.h
   include/tslib/api.h
@@ -21,7 +22,8 @@ set(COMMON_SOURCES
   source/types_private.h)
 add_library(tslib STATIC ${COMMON_SOURCES})
 add_executable(tests ${COMMON_SOURCES}
-  tests/main.cpp)
+  tests/main.cpp
+  tests/basic.cpp)
 generate_export_header(tslib)
 set_target_properties(tslib PROPERTIES
   VERSION ${PROJECT_VERSION}
@@ -41,3 +43,6 @@ install(FILES
   include/tslib/api.h
   include/tslib/types.h
   ${PROJECT_BINARY_DIR}/tslib_export.h DESTINATION ${INCLUDE_INSTALL_DIR})
+
+add_subdirectory(third_party)
+target_link_libraries(tests lib_gtest)
