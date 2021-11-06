@@ -1,5 +1,5 @@
 #pragma once
-#include "tslib/types.h"
+#include "types.h"
 #include "tslib_export.h"
 
 void TSLIB_EXPORT tspInitializeSimulation(TSP::tsp_simulation_data_nasch data);

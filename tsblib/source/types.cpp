@@ -1,9 +1,8 @@
-#pragma once
-
 #include "include/tslib/types.h"
 #include "source/helpers/helper_math.h"
 #include "source/types_private.h"
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 
 namespace TSP {

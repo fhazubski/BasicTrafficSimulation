@@ -2,7 +2,7 @@ import QtQuick 2.9
 import QtQuick.Window 2.2
 import Checkerboard 1.0
 import Simulation 1.0
-import QtQuick.Controls 1.4
+import QtQuick.Controls
 
 Window {
     visible: true
@@ -20,13 +20,13 @@ Window {
         spacing: 20
         Slider {
             id: speedSlider
-            minimumValue: -9
-            maximumValue: 9
+            from: -9
+            to: 9
             value: 0
             stepSize: 0.2
             width: 400
             property double speed: {
-                if (value == 0) {
+                if (value === 0) {
                     return 1;
                 } else if (value < 0) {
                     return 1 + value / 10;

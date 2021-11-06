@@ -14,7 +14,7 @@ tsp_float HelperMath::getRandom() {
     initialize = false;
   }
   return (static_cast<tsp_float>(rand() + 1) /
-          static_cast<tsp_float>(RAND_MAX + 1));
+          static_cast<tsp_float>(static_cast<tsp_int>(RAND_MAX) + 1));
 }
 
 // Returns random integer x, where min <= x <= max

@@ -2,6 +2,7 @@
 #include "source/helpers/helper_math.h"
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <iostream>
 
 namespace TSP {

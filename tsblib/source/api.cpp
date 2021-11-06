@@ -2,6 +2,7 @@
 #include "source/base.h"
 #include "source/simulation_knospe.h"
 #include "source/simulation_nasch.h"
+#include <cmath>
 #include <iostream>
 
 #define CHECK_INIT_AND_ON_FAIL_RETURN(VALUE)                                   \

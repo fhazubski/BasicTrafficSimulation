@@ -70,7 +70,7 @@ void SimulationView::paint(QPainter *painter) {
                 yStart - cellSize * 3 / 4 + light->lane * cellSize, cellSize,
                 cellSize);
     painter->setPen("#00000000");
-    painter->drawRoundRect(rect, 99, 99);
+    painter->drawRoundedRect(rect, 99, 99);
     painter->setPen("#000000");
     painter->drawText(rect, Qt::AlignCenter,
                       QString::number(light->timeToNextState));

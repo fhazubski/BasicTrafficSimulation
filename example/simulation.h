@@ -1,7 +1,7 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-#include "tslib/types.h"
+#include "tslib/include/types.h"
 #include <QList>
 #include <QObject>
 #include <QQmlListProperty>

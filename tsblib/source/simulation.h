@@ -6,7 +6,7 @@ namespace TSP {
 
 class Simulation {
 public:
-  ~Simulation() {
+  virtual ~Simulation() {
     for (auto lane : roadLanes) {
       delete lane;
     }

@@ -1,7 +1,7 @@
 #ifndef SIMULATIONDATA_H
 #define SIMULATIONDATA_H
 
-#include "tslib/types.h"
+#include "tslib/include/types.h"
 
 struct NoTrafficLights : TSP::tsp_traffic_lights_data {
   NoTrafficLights() { enableTrafficLights = false; }

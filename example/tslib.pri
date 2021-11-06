@@ -1,12 +1,11 @@
-win32: LIBS += -L$$PWD/../tsblib/build/lib_install/ -ltslib
+LIBS += -L../install/tslib/bin/ -ltslib
 
-INCLUDEPATH += $$PWD/../tsblib/build/include_install
-DEPENDPATH += $$PWD/../tsblib/build/lib_install
+INCLUDEPATH += ../install
 
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../tsblib/build/lib_install/tslib.lib
-else:win32-g++: PRE_TARGETDEPS += $$PWD/../tsblib/build/lib_install/libtslib.a
+# This could be required for Windows
+#win32:!win32-g++: PRE_TARGETDEPS += ../install/tslib/bin/tslib.lib
 
 HEADERS += \
-    $$PWD/../tsblib/build/include_install/tslib/api.h \
-    $$PWD/../tsblib/build/include_install/tslib/tslib_export.h \
-    $$PWD/../tsblib/build/include_install/tslib/types.h
+    ../install/tslib/include/api.h \
+    ../install/tslib/include/tslib_export.h \
+    ../install/tslib/include/types.h
