@@ -51,7 +51,7 @@ install(FILES
 
 add_custom_command(
     TARGET tslib POST_BUILD
-    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR} --config $<CONFIG>
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}
 )
 
 add_subdirectory(third_party)
