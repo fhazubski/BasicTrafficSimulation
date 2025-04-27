@@ -1,0 +1,21 @@
+name: Build tsblib
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4 
+    - name: cmake
+      run: cmake --build build_tsblib ./tsblib/.
+    - name: make
+      run: make
+      with:
+        path: ./build_tsblib

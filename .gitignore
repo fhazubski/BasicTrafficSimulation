@@ -1,5 +1,8 @@
 *.pro.user*
 */build/*
+build_*/*
 build-*/*
 .DS_Store
 install/*
+*.diff
+*.patch
