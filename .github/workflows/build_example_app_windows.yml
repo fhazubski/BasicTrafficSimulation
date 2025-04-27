@@ -21,8 +21,6 @@ jobs:
         target:       desktop
         arch:         win64_msvc2022_64
         dir:          ${{ github.workspace }}/qt
-    - name: Create build directory
-      run:  mkdir ${{ github.workspace }}\example\build_example_app
     - name: Download JOM
       uses: suisei-cn/actions-download-file@v1
       with:
@@ -31,17 +29,15 @@ jobs:
     - name: Unzip JOM
       working-directory: ${{ runner.temp }}
       run:  7z x jom.zip -ojom
-    - name: cmake
-      run: cmake -B ./build_tsblib ./tsblib
-    - name: build
-      working-directory: ./build_tsblib
-      run: cmake --build .
-    - name: Set up Visual Studio shell
+    - name: Set up VS shell
       uses: egor-tensin/vs-shell@v2
-      with:
-        arch: x64
+    - name: Build tsblib
+      run: |
+           cmake -B ./build_tsblib ./tsblib
+           cmake --build ./build_tsblib
     - name: Build example app
-      working-directory: ${{ github.workspace }}/example/build_example_app
       run:  |
+            mkdir ${{ github.workspace }}\build_example_app
+            cd ${{ github.workspace }}\build_example_app
             qmake ${{ github.workspace }}\example\TrafficSimulationBasic.pro
             ${{ runner.temp }}\jom\jom -j2
