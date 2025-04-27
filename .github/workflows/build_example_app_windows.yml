@@ -20,10 +20,10 @@ jobs:
         host:         windows
         target:       desktop
         arch:         win64_msvc2022_64
-        dir:          ${{ github.workspace }}/qt/
+        dir:          ${{ github.workspace }}/qt
         tools:        'tools_ifw tools_qtcreator,qt.tools.qtcreator'
     - name: Create build directory
-      run:  mkdir ${{ runner.temp }}\build_example_app
+      run:  mkdir ${{ github.workspace }}\build_example_app
     - name: Download JOM
       uses: suisei-cn/actions-download-file@v1.6.0
       with:
@@ -38,7 +38,7 @@ jobs:
       working-directory: ./build_tsblib
       run: cmake --build .
     - name: Build example app
-      working-directory: ${{ runner.temp }}\build_example_app
+      working-directory: ${{ github.workspace }}\build_example_app
       run:  |
-            qmake -d ${{ runner.temp }}\example\TrafficSimulationBasic.pro
-            ${{ runner.temp }}\jom\jom -j2
+            qmake ${{ github.workspace }}\example\TrafficSimulationBasic.pro
+            ${{ github.workspace }}\jom\jom -j2
