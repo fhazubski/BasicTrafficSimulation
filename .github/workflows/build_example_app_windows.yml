@@ -22,7 +22,7 @@ jobs:
         arch:         win64_msvc2022_64
         dir:          ${{ github.workspace }}/qt
     - name: Create build directory
-      run:  mkdir ${{ github.workspace }}\build_example_app
+      run:  mkdir ${{ github.workspace }}\example\build_example_app
     - name: Download JOM
       uses: suisei-cn/actions-download-file@v1
       with:
@@ -41,7 +41,7 @@ jobs:
       with:
         arch: x64
     - name: Build example app
-      working-directory: ${{ github.workspace }}\build_example_app
+      working-directory: ${{ github.workspace }}/example/build_example_app
       run:  |
             qmake ${{ github.workspace }}\example\TrafficSimulationBasic.pro
             ${{ runner.temp }}\jom\jom -j2
