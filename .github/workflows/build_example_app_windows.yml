@@ -18,7 +18,9 @@ jobs:
       with:
         url:    http://download.qt.io/official_releases/jom/jom.zip
         target: ${{ runner.temp }}
-      run: 7z x ${{ runner.temp }}/jom.zip -o ${{ runner.temp }}/jom
+    - name: Unzip JOM
+      working-directory: ${{ runner.temp }}
+      run:  7z x jom.zip -ojom
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
