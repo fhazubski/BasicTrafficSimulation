@@ -16,4 +16,4 @@ jobs:
     - name: cmake
       run: cmake -B ${{ github.workspace }}/build_tsblib ${{ github.workspace }}/tsblib
     - name: build
-      run: cmake --build ${{ github.workspace }}/build_tsblib -j2
+      run: cmake --build ${{ github.workspace }}/build_tsblib -j8

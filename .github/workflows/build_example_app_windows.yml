@@ -34,10 +34,10 @@ jobs:
     - name: Build tsblib
       run: |
            cmake -B ./build_tsblib ./tsblib
-           cmake --build ./build_tsblib -j2
+           cmake --build ./build_tsblib -j8
     - name: Build example app
       run:  |
             mkdir ${{ github.workspace }}\build_example_app
             cd ${{ github.workspace }}\build_example_app
             qmake ${{ github.workspace }}\example\TrafficSimulationBasic.pro
-            ${{ runner.temp }}\jom\jom -j2 -f Makefile.Debug
+            ${{ runner.temp }}\jom\jom -j8 -f Makefile.Debug
