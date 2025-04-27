@@ -1,0 +1,41 @@
+name: Build example app - Ubuntu
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version:      6.8.2
+        host:         linux
+        target:       desktop
+        arch:         linux_gcc_64
+        dir:          ${{ github.workspace }}/qt
+    - name: Download JOM
+      uses: suisei-cn/actions-download-file@v1
+      with:
+        url:    http://download.qt.io/official_releases/jom/jom.zip
+        target: ${{ runner.temp }}
+    - name: Unzip JOM
+      working-directory: ${{ runner.temp }}
+      run:  7z x jom.zip -ojom
+    - name: Build tsblib
+      run: |
+           cmake -B ./build_tsblib ./tsblib
+           cmake --build ./build_tsblib
+    - name: Build example app
+      run:  |
+            mkdir ${{ github.workspace }}/build_example_app
+            cd ${{ github.workspace }}/build_example_app
+            qmake ${{ github.workspace }}/example/TrafficSimulationBasic.pro
+            ${{ runner.temp }}/jom/jom -j2 -f Makefile.Debug
