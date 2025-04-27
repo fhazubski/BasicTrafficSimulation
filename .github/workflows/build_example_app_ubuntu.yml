@@ -21,14 +21,6 @@ jobs:
         target:       desktop
         arch:         linux_gcc_64
         dir:          ${{ github.workspace }}/qt
-    - name: Download JOM
-      uses: suisei-cn/actions-download-file@v1
-      with:
-        url:    http://download.qt.io/official_releases/jom/jom.zip
-        target: ${{ runner.temp }}
-    - name: Unzip JOM
-      working-directory: ${{ runner.temp }}
-      run:  7z x jom.zip -ojom
     - name: Build tsblib
       run: |
            cmake -B ./build_tsblib ./tsblib
@@ -38,4 +30,4 @@ jobs:
             mkdir ${{ github.workspace }}/build_example_app
             cd ${{ github.workspace }}/build_example_app
             qmake ${{ github.workspace }}/example/TrafficSimulationBasic.pro
-            ${{ runner.temp }}/jom/jom -j2 -f Makefile.Debug
+            make -j2 -f Makefile.Debug
