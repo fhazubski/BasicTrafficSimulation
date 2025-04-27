@@ -14,7 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: cmake
-      run: cmake -B ./build_tsblib ./tsblib
+      run: cmake -B ${{ github.workspace }}/build_tsblib ${{ github.workspace }}/tsblib
     - name: build
-      working-directory: ./build_tsblib
-      run: cmake --build .
+      run: cmake --build ${{ github.workspace }}/build_tsblib -j8
