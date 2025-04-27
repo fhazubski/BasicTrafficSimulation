@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "master" ]
 
+env:
+  SOURCE_DIR: ./tsblib
+  BUILD_DIR: ./build_tsblib
+
 jobs:
   build:
 
@@ -14,6 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4 
     - name: cmake
-      run: cmake --build build_tsblib ./tsblib/.
+      run: cmake -B $BUILD_DIR $SOURCE_DIR
     - name: make
-      run: make --directory ./tsblib
+      working-directory: $BUILD_DIR
+      run: make
