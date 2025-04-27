@@ -13,13 +13,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: gcc: cmake
+    - name: gcc cmake
       run: cmake -B ./build_tsblib_gcc -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ ./tsblib
-    - name: gcc: build
+    - name: gcc build
       working-directory: ./build_tsblib_gcc
       run: make
-    - name: clang: cmake
+    - name: clang cmake
       run: cmake -B ./build_tsblib_clang -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ./tsblib
-    - name: clang: build
+    - name: clang build
       working-directory: ./build_tsblib_clang
       run: make
