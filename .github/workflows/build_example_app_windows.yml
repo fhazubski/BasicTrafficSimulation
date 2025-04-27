@@ -21,7 +21,6 @@ jobs:
         target:       desktop
         arch:         win64_msvc2022_64
         dir:          ${{ github.workspace }}/qt
-        setup-python: false
     - name: Create build directory
       run:  mkdir ${{ github.workspace }}\build_example_app
     - name: Download JOM
