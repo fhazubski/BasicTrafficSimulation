@@ -6,7 +6,7 @@ include(GenerateExportHeader)
 set (CMAKE_CXX_STANDARD 11)
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE Debug)
+  set (CMAKE_BUILD_TYPE "Debug")
 endif()
 
 # Qt doesn't seem to support 12.0 SDK
