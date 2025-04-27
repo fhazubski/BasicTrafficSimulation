@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 3.15)
+cmake_policy(SET CMP0177 NEW) # install() DESTINATION paths are normalized.
+
 project(tslib VERSION 1.0.0 DESCRIPTION "Traffic Simulation Library")
 include(GNUInstallDirs)
 include(GenerateExportHeader)
 
 set (CMAKE_CXX_STANDARD 11)
+
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
+  set (CMAKE_BUILD_TYPE "Debug")
+endif()
 
 # Qt doesn't seem to support 12.0 SDK
 set(CMAKE_OSX_DEPLOYMENT_TARGET "11")
@@ -51,7 +57,7 @@ install(FILES
 
 add_custom_command(
     TARGET tslib POST_BUILD
-    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR} --config ${CMAKE_BUILD_TYPE}
 )
 
 add_subdirectory(third_party)
