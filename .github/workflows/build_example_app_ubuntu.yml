@@ -1,0 +1,33 @@
+name: Build example app - Ubuntu
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version:      6.8.2
+        host:         linux
+        target:       desktop
+        arch:         linux_gcc_64
+        dir:          ${{ github.workspace }}/qt
+    - name: Build tsblib
+      run: |
+           cmake -B ./build_tsblib ./tsblib
+           cmake --build ./build_tsblib -j8
+    - name: Build example app
+      run:  |
+            mkdir ${{ github.workspace }}/build_example_app
+            cd ${{ github.workspace }}/build_example_app
+            qmake -makefile ${{ github.workspace }}/example/TrafficSimulationBasic.pro
+            make -j8
