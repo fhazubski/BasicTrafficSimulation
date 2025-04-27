@@ -16,6 +16,4 @@ jobs:
     - name: cmake
       run: cmake --build build_tsblib ./tsblib/.
     - name: make
-      run: make
-      with:
-        path: ./build_tsblib
+      run: make --directory ./tsblib
