@@ -29,5 +29,5 @@ jobs:
       run:  |
             mkdir ${{ github.workspace }}/build_example_app
             cd ${{ github.workspace }}/build_example_app
-            qmake ${{ github.workspace }}/example/TrafficSimulationBasic.pro
+            qmake -makefile ${{ github.workspace }}/example/TrafficSimulationBasic.pro
             make -j2 -f Makefile.Debug
