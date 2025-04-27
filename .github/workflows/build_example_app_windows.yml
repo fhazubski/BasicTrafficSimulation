@@ -1,0 +1,43 @@
+name: Build example app - Windows
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version:      6.8.2
+        host:         windows
+        target:       desktop
+        arch:         win64_msvc2022_64
+        dir:          ${{ github.workspace }}/qt
+    - name: Download JOM
+      uses: suisei-cn/actions-download-file@v1
+      with:
+        url:    http://download.qt.io/official_releases/jom/jom.zip
+        target: ${{ runner.temp }}
+    - name: Unzip JOM
+      working-directory: ${{ runner.temp }}
+      run:  7z x jom.zip -ojom
+    - name: Set up VS shell
+      uses: egor-tensin/vs-shell@v2
+    - name: Build tsblib
+      run: |
+           cmake -B ./build_tsblib ./tsblib
+           cmake --build ./build_tsblib -j2
+    - name: Build example app
+      run:  |
+            mkdir ${{ github.workspace }}\build_example_app
+            cd ${{ github.workspace }}\build_example_app
+            qmake ${{ github.workspace }}\example\TrafficSimulationBasic.pro
+            ${{ runner.temp }}\jom\jom -j2 -f Makefile.Debug
