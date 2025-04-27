@@ -1,4 +1,4 @@
-name: Build tsblib
+name: Build tsblib - Ubuntu
 
 on:
   push:
@@ -17,9 +17,9 @@ jobs:
       run: cmake -B ./build_tsblib_gcc -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ ./tsblib
     - name: gcc build
       working-directory: ./build_tsblib_gcc
-      run: make
+      run: cmake --build .
     - name: clang cmake
       run: cmake -B ./build_tsblib_clang -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ./tsblib
     - name: clang build
       working-directory: ./build_tsblib_clang
-      run: make
+      run: cmake --build .
