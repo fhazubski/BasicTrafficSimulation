@@ -21,7 +21,6 @@ jobs:
         target:       desktop
         arch:         win64_msvc2022_64
         dir:          ${{ github.workspace }}/qt/
-        modules:      'quick qml'
         tools:        'tools_ifw tools_qtcreator,qt.tools.qtcreator'
     - name: Create build directory
       run:  mkdir ${{ runner.temp }}\build_example_app
