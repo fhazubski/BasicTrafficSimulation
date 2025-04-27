@@ -39,5 +39,6 @@ jobs:
       run: cmake --build .
     - name: Build example app
       working-directory: ${{ runner.temp }}\build_example_app
-      run:  qmake -d ${{ env.SOURCE_DIR }}\example\TrafficSimulationBasic.pro
+      run:  |
+            qmake -d ${{ env.SOURCE_DIR }}\example\TrafficSimulationBasic.pro
             ${{ runner.temp }}\jom\jom -j2
