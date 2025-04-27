@@ -21,11 +21,11 @@ jobs:
         target:       desktop
         arch:         win64_msvc2022_64
         dir:          ${{ github.workspace }}/qt
-        tools:        'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+        setup-python: false
     - name: Create build directory
       run:  mkdir ${{ github.workspace }}\build_example_app
     - name: Download JOM
-      uses: suisei-cn/actions-download-file@v1.6.0
+      uses: suisei-cn/actions-download-file@v1
       with:
         url:    http://download.qt.io/official_releases/jom/jom.zip
         target: ${{ runner.temp }}
@@ -37,8 +37,12 @@ jobs:
     - name: build
       working-directory: ./build_tsblib
       run: cmake --build .
+    - name: Set up Visual Studio shell
+      uses: egor-tensin/vs-shell@v2
+      with:
+        arch: x64
     - name: Build example app
       working-directory: ${{ github.workspace }}\build_example_app
       run:  |
             qmake ${{ github.workspace }}\example\TrafficSimulationBasic.pro
-            ${{ github.workspace }}\jom\jom -j2
+            ${{ runner.temp }}\jom\jom -j2
