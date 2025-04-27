@@ -1,4 +1,4 @@
-name: Build tsblib
+name: Build tsblib - Windows
 
 on:
   push:
